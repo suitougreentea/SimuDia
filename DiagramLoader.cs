@@ -110,7 +110,8 @@ namespace simutrans_diagram
                                 var fromTime = parseTime(multipleTimeSplit.Groups[1].Value.Trim()).Ticks;
                                 var toTime = parseTime(multipleTimeSplit.Groups[2].Value.Trim()).Ticks;
                                 var time = toTime - fromTime;
-                                while (time < 0) time += _monthLength ?? throw new InvalidOperationException();
+                                if (_monthLength == null) throw new InvalidOperationException();
+                                while (time < 0) time += _monthLength.Value;
                                 return time;
                             }
                             else return parseTime(trimmed).Ticks;
@@ -123,8 +124,9 @@ namespace simutrans_diagram
                     {
                         if (l.StartsWith("-"))
                         {
+                            if (currentLineDivisor == null) throw new InvalidOperationException();
                             lines.Add(new LineData(currentLineName,
-                                currentLineDivisor ?? throw new InvalidOperationException(),
+                                currentLineDivisor.Value,
                                 currentLineWidth,
                                 currentLineColor,
                                 currentLineDefaultLoadingTime,
@@ -203,16 +205,19 @@ namespace simutrans_diagram
                     }
                 }
             }
+            if (currentLineDivisor == null) throw new InvalidOperationException();
             lines.Add(new LineData(currentLineName,
-                currentLineDivisor ?? throw new InvalidOperationException(),
+                currentLineDivisor.Value,
                 currentLineWidth,
                 currentLineColor,
                 currentLineDefaultLoadingTime,
                 currentLineDefaultReversingTime,
                 currentLineStations));
 
-            var monthLength = _monthLength ?? throw new InvalidOperationException();
-            var shiftDivisor = _shiftDivisor ?? throw new InvalidOperationException();
+            if (_monthLength == null) throw new InvalidOperationException();
+            if (_shiftDivisor == null) throw new InvalidOperationException();
+            var monthLength = _monthLength.Value;
+            var shiftDivisor = _shiftDivisor.Value;
 
             return new Diagram(monthLength, shiftDivisor, defaultLoadingTime, defaultReversingTime, stations, times, lines);
         }
