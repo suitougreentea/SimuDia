@@ -20,11 +20,17 @@ namespace simutrans_diagram
 
         public static void drawLine(Graphics g, Pen pen, long fromTime, float fromY, long toTime, float toY, long monthLength, long horizontalScale)
         {
+            if (fromTime > toTime) return;
+            while (fromTime > monthLength)
+            {
+                fromTime -= monthLength;
+                toTime -= monthLength;
+            }
             if (toTime > monthLength)
             {
                 var interY = fromY + (toY - fromY) * ((float)(monthLength - fromTime) / (toTime - fromTime));
-                g.DrawLine(pen, (float)fromTime / horizontalScale, fromY, (float)monthLength / horizontalScale, interY);
-                g.DrawLine(pen, 0f, interY, (float)(toTime % monthLength) / horizontalScale, toY);
+                drawLine(g, pen, fromTime, fromY, monthLength, interY, monthLength, horizontalScale);
+                drawLine(g, pen, 0L, interY, toTime - monthLength, toY, monthLength, horizontalScale);
             }
             else
             {

@@ -1,6 +1,7 @@
 ﻿[General]
 month_length=62400
 shift_divisor=1440
+default_loading_time = 0030
 
 [Stations]
 Farford
@@ -8,37 +9,54 @@ LittleBickingate
 Menford
 Swafhurst
 Rosehurst
+LittleBickingate@1
+Branch
 
 [RawTimes]
 Farford -> LittleBickingate : 10015-12110
 LittleBickingate -> Menford : 11930-15310
 Menford -> Swafhurst : 15145-21635
 Swafhurst -> Rosehurst : 21710-23150
+LittleBickingate@1 -> Branch: 3000
 
 Rosehurst -> Swafhurst : 23920-25320
 Swafhurst -> Menford : 25345-31750
 Menford -> LittleBickingate : 31810-35105
 LittleBickingate -> Farford : 34925-41000
+Branch -> LittleBickingate@1: 1500, 1000
 
 [Lines]
 name = Local
-divisor = 18
-Farford
-<fill, wait_by_time = 0300> Menford
-<fill, reverse> Rosehurst
-<fill, wait_by_time = 0300> Menford
-<fill> Farford
+divisor = 16
+default_reversing_time = 0200
+<reverse, shift=0200> Farford
+LittleBickingate
+Menford
+Swafhurst
+<reverse> Rosehurst
+Swafhurst
+Menford
+LittleBickingate
 --------------------
 name = Rapid
-divisor = 6
+divisor = 8
 color = #FF0000
 width = 2
-<shift_by_time = 1930> Farford
-<shorten_by_time = 0800> LittleBickingate
-<shorten_by_time = 1000> Menford
-<shorten_by_time = 0800> Swafhurst
-<shorten_by_time = 0400, wait_by_time = 0630> Rosehurst
-<shorten_by_time = 0400> Swafhurst
-<shorten_by_time = 0800> Menford
-<shorten_by_time = 1000> LittleBickingate
-<shorten_by_time = 0800> Farford
+<reverse, trip_offset = -0800> Farford
+<load=0100, trip_offset = -1000> LittleBickingate
+<trip_offset = -0800> Menford
+<trip_offset = -0400> Swafhurst
+<reverse=0200, wait = 0800, trip_offset = -0400> Rosehurst
+<trip_offset = -0800> Swafhurst
+<trip_offset = -1000> Menford
+<trip_offset = -0800> LittleBickingate
+--------------------
+name = Branch
+divisor = 1
+color = #0000FF
+<shift_num=20, reverse, trip = 4000> Farford
+LittleBickingate
+LittleBickingate@1
+Branch
+LittleBickingate@1
+LittleBickingate

@@ -11,6 +11,14 @@ namespace simutrans_diagram
 {
     class DiagramLoader
     {
+        private static TimeSpan parseOffsetTime(string input)
+        {
+            var match = Regex.Match(input, @"([+-]?)(.*)");
+            var time = parseTime(match.Groups[2].Value.Trim());
+            if (match.Groups[1].Value == "-") return time.Negate();
+            return time;
+        }
+
         private static TimeSpan parseTime(string input)
         {
             var hms = Regex.Match(input, @"([0-9]*)([0-5][0-9])([0-5][0-9])");
@@ -36,14 +44,18 @@ namespace simutrans_diagram
         {
             var mode = "Top";
 
+            long? _monthLength = null;
+            int? _shiftDivisor = null;
+            long defaultLoadingTime = new TimeSpan(0, 0, 30).Ticks;
+            long defaultReversingTime = new TimeSpan(0, 1, 0).Ticks;
+
             string currentLineName = null;
             int? currentLineDivisor = null;
             var currentLineWidth = 1f;
             var currentLineColor = Color.Black;
             var currentLineStations = new List<LineStationData>();
-
-            long? _monthLength = null;
-            int? _shiftDivisor = null;
+            long? currentLineDefaultLoadingTime = null;
+            long? currentLineDefaultReversingTime = null;
 
             var stations = new List<Station>();
             var times = new List<TimeData>();
@@ -74,6 +86,8 @@ namespace simutrans_diagram
 
                         if (name == "month_length") _monthLength = parseTime(value).Ticks;
                         if (name == "shift_divisor") _shiftDivisor = int.Parse(value);
+                        if (name == "default_loading_time") defaultLoadingTime = parseTime(value).Ticks;
+                        if (name == "default_reversing_time") defaultReversingTime = parseTime(value).Ticks;
                     }
                     if (mode == "Stations")
                     {
@@ -113,62 +127,78 @@ namespace simutrans_diagram
                                 currentLineDivisor ?? throw new InvalidOperationException(),
                                 currentLineWidth,
                                 currentLineColor,
+                                currentLineDefaultLoadingTime,
+                                currentLineDefaultReversingTime,
                                 currentLineStations));
                             currentLineName = null;
                             currentLineDivisor = null;
                             currentLineWidth = 1f;
                             currentLineColor = Color.Black;
+                            currentLineDefaultLoadingTime = null;
+                            currentLineDefaultReversingTime = null;
                             currentLineStations = new List<LineStationData>();
                         }
-                        else if (!l.StartsWith("<"))
+                        else if (!l.StartsWith("<") && l.IndexOf("=") >= 0)
                         {
-                            if (l.IndexOf("=") >= 0)
-                            {
-                                var split = Regex.Match(l, @"(.*)=(.*)");
-                                var name = split.Groups[1].Value.Trim();
-                                var value = split.Groups[2].Value.Trim();
-                                if (name == "name") currentLineName = value;
-                                if (name == "divisor") currentLineDivisor = int.Parse(value);
-                                if (name == "divisor_by_every" && currentLineDivisor == null) currentLineDivisor = (int)(_monthLength / parseTime(value).Ticks);
-                                if (name == "width") currentLineWidth = float.Parse(value);
-                                if (name == "color") currentLineColor = ColorTranslator.FromHtml(value);
-                            }
-                            else
-                            {
-                                var station = parseStation(l);
-                                currentLineStations.Add(new LineStationData(null, null, null, false, false, station));
-                            }
+                            var split = Regex.Match(l, @"(.*)=(.*)");
+                            var name = split.Groups[1].Value.Trim();
+                            var value = split.Groups[2].Value.Trim();
+                            if (name == "name") currentLineName = value;
+                            if (name == "divisor") currentLineDivisor = int.Parse(value);
+                            if (name == "divisor_by_every" && currentLineDivisor == null) currentLineDivisor = (int)(_monthLength / parseTime(value).Ticks);
+                            if (name == "width") currentLineWidth = float.Parse(value);
+                            if (name == "color") currentLineColor = ColorTranslator.FromHtml(value);
+                            if (name == "default_loading_time") currentLineDefaultLoadingTime = parseTime(value).Ticks;
+                            if (name == "default_reversing_time") currentLineDefaultReversingTime = parseTime(value).Ticks;
                         }
                         else
                         {
-                            int? shift = null;
-                            int? wait = null;
-                            long? shorten = null;
-                            var fill = false;
-                            var reverse = false;
-                            var split = Regex.Match(l, @"<(.*)>(.*)");
-                            var options = split.Groups[1].Value.Trim().Split(',');
-                            foreach (var str in options) {
-                                var s = str.Trim();
-                                if (s.IndexOf('=') >= 0)
-                                {
-                                    var optSplit = Regex.Match(s, @"(.*)=(.*)");
-                                    var name = optSplit.Groups[1].Value.Trim();
-                                    var value = optSplit.Groups[2].Value.Trim();
-                                    if (name == "shift") shift = int.Parse(value);
-                                    if (name == "shift_by_time" && shift == null) shift = (int)(((double)parseTime(value).Ticks / _monthLength) * _shiftDivisor);
-                                    if (name == "wait" && shift == null) wait = int.Parse(value);
-                                    if (name == "wait_by_time" && wait == null && shift == null) wait = (int)(((double)parseTime(value).Ticks / _monthLength) * _shiftDivisor);
-                                    if (name == "shorten_by_time") shorten = parseTime(value).Ticks;
+                            Station station;
+                            long? shiftTime = null;
+                            int? shiftNum = null;
+                            long? waitingTime = null;
+                            long? loadingTime = null;
+                            bool reverse = false;
+                            long? reversingTime = null;
+                            long? tripTime = null;
+                            long? tripTimeOffset = null;
+
+                            if (l.StartsWith("<"))
+                            {
+                                var split = Regex.Match(l, @"<(.*)>(.*)");
+                                var options = split.Groups[1].Value.Trim().Split(',');
+
+                                foreach (var str in options) {
+                                    var s = str.Trim();
+                                    if (s.IndexOf('=') >= 0)
+                                    {
+                                        var optSplit = Regex.Match(s, @"(.*)=(.*)");
+                                        var name = optSplit.Groups[1].Value.Trim();
+                                        var value = optSplit.Groups[2].Value.Trim();
+                                        if (name == "shift") shiftTime = parseTime(value).Ticks;
+                                        if (name == "shift_num") shiftNum = int.Parse(value);
+                                        if (name == "wait") waitingTime = parseTime(value).Ticks;
+                                        if (name == "load") loadingTime = parseTime(value).Ticks;
+                                        if (name == "trip") tripTime = parseTime(value).Ticks;
+                                        if (name == "trip_offset") tripTimeOffset = parseOffsetTime(value).Ticks;
+                                        if (name == "reverse")
+                                        {
+                                            reverse = true;
+                                            reversingTime = parseTime(value).Ticks;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (s == "reverse") reverse = true;
+                                    }
                                 }
-                                else
-                                {
-                                    if (s == "fill") fill = true;
-                                    if (s == "reverse") reverse = true;
-                                }
+                                station = parseStation(split.Groups[2].Value.Trim());
                             }
-                            var station = parseStation(split.Groups[2].Value.Trim());
-                            currentLineStations.Add(new LineStationData(shift, wait, shorten, fill, reverse, station));
+                            else
+                            {
+                                station = parseStation(l);
+                            }
+                            currentLineStations.Add(new LineStationData(station, shiftTime, shiftNum, waitingTime, loadingTime, reverse, reversingTime, tripTime, tripTimeOffset));
                         }
                     }
                 }
@@ -177,34 +207,14 @@ namespace simutrans_diagram
                 currentLineDivisor ?? throw new InvalidOperationException(),
                 currentLineWidth,
                 currentLineColor,
+                currentLineDefaultLoadingTime,
+                currentLineDefaultReversingTime,
                 currentLineStations));
 
             var monthLength = _monthLength ?? throw new InvalidOperationException();
             var shiftDivisor = _shiftDivisor ?? throw new InvalidOperationException();
 
-            var expandedLines = lines.Select(it =>
-            {
-                var stationData = new List<LineStationData>();
-                stationData.Add(it.stations[0]);
-                for (var i = 1; i < it.stations.Count; i++)
-                {
-                    var from = it.stations[i - 1];
-                    var to = it.stations[i];
-                    if (to.fill)
-                    {
-                        var expanded = Util.expandStation(stations, from.station, to.station);
-                        for (var j = 1; j < expanded.Count - 1; j++)
-                        {
-                            stationData.Add(new LineStationData(null, null, null, false, false, expanded[j]));
-                        }
-                        stationData.Add(it.stations[i]);
-                    }
-                    else stationData.Add(it.stations[i]);
-                }
-                return new LineData(it.name, it.divisor, it.width, it.color, stationData);
-            }).ToList();
-
-            return new Diagram(monthLength, shiftDivisor, stations, times, lines, expandedLines);
+            return new Diagram(monthLength, shiftDivisor, defaultLoadingTime, defaultReversingTime, stations, times, lines);
         }
     }
 }

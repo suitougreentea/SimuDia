@@ -58,26 +58,46 @@ namespace simutrans_diagram
     }
     public struct LineStationData
     {
-        public readonly int? shift;
-        public readonly int? wait;
-        public readonly long? shorten;
-        public readonly bool fill;
-        public readonly bool reverse;
         public readonly Station station;
+        // Waiting time parameters are that AFTER ARRIVAL
+        // shift and wait indicate absolute shift;
+        // if calculated stopping time is shorter than essential stopping time, the program will emit a warning.
+        // shift: specify shift by time
+        public readonly long? shiftTime;
+        // shift_num: specify shift by in-game parameter
+        public readonly int? shiftNum;
+        // wait: specify waiting time from arrival to departure
+        public readonly long? waitingTime;
+        
+        // essential stopping time
+        // load (time: optional)
+        public readonly long? loadingTime;
+        // reverse (time: optional)
+        public readonly bool reverse;
+        public readonly long? reversingTime;
 
-        public LineStationData(int? shift, int? wait, long? shorten, bool fill, bool reverse, Station station)
+        // Trip time is that between NEXT station
+        // trip: you can override trip time
+        public readonly long? tripTime;
+        // trip_offset
+        public readonly long? tripTimeOffset;
+
+        public LineStationData(Station station, long? shiftTime, int? shiftNum, long? waitingTime, long? loadingTime, bool reverse, long? reversingTime, long? tripTime, long? tripTimeOffset)
         {
-            this.shift = shift;
-            this.wait = wait;
-            this.shorten = shorten;
-            this.fill = fill;
-            this.reverse = reverse;
             this.station = station;
+            this.shiftTime = shiftTime;
+            this.shiftNum = shiftNum;
+            this.waitingTime = waitingTime;
+            this.loadingTime = loadingTime;
+            this.reverse = reverse;
+            this.reversingTime = reversingTime;
+            this.tripTime = tripTime;
+            this.tripTimeOffset = tripTimeOffset;
         }
 
         public override string ToString()
         {
-            return $"<shift: {shift}, wait: {wait}, fill: {fill}, reverse: {reverse}> {station}";
+            return $"Stops at {station.ToString()}";
         }
     }
     public struct LineData
@@ -86,20 +106,56 @@ namespace simutrans_diagram
         public readonly int divisor;
         public readonly float width;
         public readonly Color color;
+        public readonly long? defaultLoadingTime;
+        public readonly long? defaultReversingTime;
         public readonly List<LineStationData> stations;
 
-        public LineData(string name, int divisor, float width, Color color, List<LineStationData> stations)
+        public LineData(string name, int divisor, float width, Color color, long? defaultLoadingTime, long? defaultReversingTime, List<LineStationData> stations)
         {
             this.name = name;
             this.divisor = divisor;
             this.width = width;
             this.color = color;
+            this.defaultLoadingTime = defaultLoadingTime;
+            this.defaultReversingTime = defaultReversingTime;
             this.stations = stations;
         }
 
         public override string ToString()
         {
             return $"[{name}] ({stations.Count} stations)";
+        }
+    }
+
+    public struct LineTimeData
+    {
+        public readonly List<LineTimeStationData> list;
+        public readonly long tripTime;
+
+        public LineTimeData(List<LineTimeStationData> list)
+        {
+            this.list = list;
+            tripTime = list.Last().departure + list.Last().tripTime - list.First().departure;
+        }
+    }
+
+    public struct LineTimeStationData
+    {
+        public readonly long arrival;
+        public readonly long departure;
+        public readonly int? shiftNum;
+        public readonly long? plannedStoppingTime;
+        public readonly long essentialStoppingTime;
+        public readonly long tripTime;
+
+        public LineTimeStationData(long arrival, long departure, int? shiftNum, long? plannedStoppingTime, long essentialStoppingTime, long tripTime)
+        {
+            this.arrival = arrival;
+            this.departure = departure;
+            this.shiftNum = shiftNum;
+            this.plannedStoppingTime = plannedStoppingTime;
+            this.essentialStoppingTime = essentialStoppingTime;
+            this.tripTime = tripTime;
         }
     }
 }
