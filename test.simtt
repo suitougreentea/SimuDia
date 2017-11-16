@@ -1,0 +1,44 @@
+﻿[General]
+month_length=62400
+shift_divisor=1440
+
+[Stations]
+Farford
+LittleBickingate
+Menford
+Swafhurst
+Rosehurst
+
+[RawTimes]
+Farford -> LittleBickingate : 10015-12110
+LittleBickingate -> Menford : 11930-15310
+Menford -> Swafhurst : 15145-21635
+Swafhurst -> Rosehurst : 21710-23150
+
+Rosehurst -> Swafhurst : 23920-25320
+Swafhurst -> Menford : 25345-31750
+Menford -> LittleBickingate : 31810-35105
+LittleBickingate -> Farford : 34925-41000
+
+[Lines]
+name = Local
+divisor = 18
+Farford
+<fill, wait_by_time = 0300> Menford
+<fill, reverse> Rosehurst
+<fill, wait_by_time = 0300> Menford
+<fill> Farford
+--------------------
+name = Rapid
+divisor = 6
+color = #FF0000
+width = 2
+<shift_by_time = 1930> Farford
+<shorten_by_time = 0800> LittleBickingate
+<shorten_by_time = 1000> Menford
+<shorten_by_time = 0800> Swafhurst
+<shorten_by_time = 0400, wait_by_time = 0630> Rosehurst
+<shorten_by_time = 0400> Swafhurst
+<shorten_by_time = 0800> Menford
+<shorten_by_time = 1000> LittleBickingate
+<shorten_by_time = 0800> Farford
