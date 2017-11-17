@@ -117,6 +117,7 @@ namespace simutrans_diagram
                 for(var n = 0; n < it.divisor; n++)
                 {
                     var divOffset = monthLength / it.divisor * n;
+                    var upsideDownDirection = false;
                     for (var j = 0; j < list.Count; j++)
                     {
                         var fromTimeData = list[j];
@@ -128,7 +129,33 @@ namespace simutrans_diagram
                         var fromY = stationY[fromStationIndex];
                         var toY = stationY[toStationIndex];
                         var currentPen = (fromStationData.station.name == toStationData.station.name) ? penDashed : pen;
-                        Util.drawLine(g, currentPen, fromTimeData.arrival + divOffset, fromY, fromTimeData.departure + divOffset, fromY, monthLength, horizontalScale);
+                        var newUpsideDownDirection = fromStationIndex > toStationIndex;
+                        var reverseDirection = upsideDownDirection != newUpsideDownDirection;
+                        upsideDownDirection = newUpsideDownDirection;
+                        if (j != 0)
+                        {
+                            if (reverseDirection)
+                            {
+                                float intervalY;
+                                if (upsideDownDirection)
+                                {
+                                    // |_|
+                                    if (fromStationIndex == stations.Count - 1) intervalY = bottomMargin;
+                                    else intervalY = stationY[fromStationIndex + 1] - stationY[fromStationIndex];
+                                }
+                                else
+                                {
+                                    // |^|
+                                    if (fromStationIndex == stations.Count - 1) intervalY = topMargin;
+                                    else intervalY = stationY[fromStationIndex] - stationY[fromStationIndex - 1];
+                                }
+                                var offset = Math.Min(10f, intervalY / 2f) * (upsideDownDirection ? 1 : -1);
+                                Util.drawLine(g, currentPen, fromTimeData.arrival + divOffset, fromY, fromTimeData.arrival + divOffset, fromY + offset, monthLength, horizontalScale);
+                                Util.drawLine(g, currentPen, fromTimeData.arrival + divOffset, fromY + offset, fromTimeData.departure + divOffset, fromY + offset, monthLength, horizontalScale);
+                                Util.drawLine(g, currentPen, fromTimeData.departure + divOffset, fromY + offset, fromTimeData.departure + divOffset, fromY, monthLength, horizontalScale);
+                            }
+                            else Util.drawLine(g, currentPen, fromTimeData.arrival + divOffset, fromY, fromTimeData.departure + divOffset, fromY, monthLength, horizontalScale);
+                        }
                         Util.drawLine(g, currentPen, fromTimeData.departure + divOffset, fromY, fromTimeData.departure + fromTimeData.tripTime + divOffset, toY, monthLength, horizontalScale);
                     }
                 }

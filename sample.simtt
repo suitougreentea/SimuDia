@@ -62,3 +62,15 @@ LittleBickingate@1
 Branch
 LittleBickingate@1
 LittleBickingate
+--------------------
+name = test
+divisor = 2
+color = #00FF00
+width = 2
+default_loading_time = 1000
+Farford
+LittleBickingate
+Menford
+LittleBickingate
+Menford
+Swafhurst
