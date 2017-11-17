@@ -1,4 +1,6 @@
-﻿[General]
+﻿# これを見て適当に察してください
+
+[General]
 month_length=62400
 shift_divisor=1440
 default_loading_time = 0030

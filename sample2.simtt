@@ -1,0 +1,31 @@
+﻿[General]
+month_length = 62400
+shift_divisor = 1440
+
+[Stations]
+始発駅
+中間駅
+終着駅
+
+[RawTimes]
+# 各駅停車の計測
+始発駅 -> 中間駅: 0300
+中間駅 -> 終着駅: 0300
+
+# 急行の計測
+始発駅 -> 終着駅: 0500
+
+[Lines]
+name = 各停
+divisor = 16
+<reverse> 始発駅
+<wait=0300> 中間駅
+<reverse, wait=0300> 終着駅
+<wait=0300>中間駅
+-----
+name = 急行
+divisor = 16
+color = #FF0000
+width = 2
+<reverse, shift=0200> 始発駅
+<reverse, wait=0700> 終着駅
