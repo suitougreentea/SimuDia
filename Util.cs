@@ -17,6 +17,5 @@ namespace simutrans_diagram
             else if (fromIndex > toIndex) return list.GetRange(toIndex, fromIndex - toIndex + 1).Reverse<Station>().ToList();
             else throw new InvalidOperationException();
         }
-
     }
 }

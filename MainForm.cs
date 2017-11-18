@@ -14,9 +14,12 @@ namespace simutrans_diagram
 {
     public partial class MainForm : Form
     {
+        string path;
+        DiagramLoader loader;
         Diagram diagram;
         Renderer renderer;
         bool ignoreCheckEvent = false;
+        bool error = false;
 
         public MainForm()
         {
@@ -67,6 +70,12 @@ namespace simutrans_diagram
             else ListLine.SetSelected(0, true);
 
             ignoreCheckEvent = false;
+            ListLine.Enabled = true;
+            ButtonZoomInH.Enabled = true;
+            ButtonZoomOutH.Enabled = true;
+            ButtonZoomInV.Enabled = true;
+            ButtonZoomOutV.Enabled = true;
+
             updateVisibility();
             updateGlobalCheck();
         }
@@ -87,16 +96,37 @@ namespace simutrans_diagram
             else ListLine.SetItemCheckState(0, CheckState.Indeterminate);
             ignoreCheckEvent = false;
         }
+        
+        private void loadAndSetupDiagram()
+        {
+            error = false;
+            try
+            {
+                loader = new DiagramLoader(path);
+                diagram = loader.load();
+                renderer = new Renderer(diagram);
+                setupComponents();
+                redraw();
+            }
+            catch (DiagramLoadingError e)
+            {
+                error = true;
+                ListLine.Enabled = false;
+                ButtonZoomInH.Enabled = false;
+                ButtonZoomOutH.Enabled = false;
+                ButtonZoomInV.Enabled = false;
+                ButtonZoomOutV.Enabled = false;
+                TextInfo.SelectedText = "*** Error Loading Diagram ***";
+                TextInfo.SelectedText = $"At line {e.line}: {e.message}";
+            }
+        }
 
         private void onLoad(object sender, EventArgs e)
         {
             var args = Environment.GetCommandLineArgs();
-            var path = Path.GetFullPath(args[1]);
+            path = Path.GetFullPath(args[1]);
 
-            diagram = DiagramLoader.load(path);
-            renderer = new Renderer(diagram);
-            setupComponents();
-            redraw();
+            loadAndSetupDiagram();
 
             var watcher = new FileSystemWatcher(Path.GetDirectoryName(path));
             watcher.Filter = Path.GetFileName(path);
@@ -105,10 +135,7 @@ namespace simutrans_diagram
             watcher.Changed += (_, __) =>
             {
                 System.Threading.Thread.Sleep(100);
-                diagram = DiagramLoader.load(path);
-                renderer = new Renderer(diagram);
-                setupComponents();
-                redraw();
+                loadAndSetupDiagram();
             };
             watcher.EnableRaisingEvents = true;
         }

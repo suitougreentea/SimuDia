@@ -45,7 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data.cs" />
+    <Compile Include="DiagramData.cs" />
     <Compile Include="Diagram.cs" />
     <Compile Include="DiagramLoader.cs" />
     <Compile Include="MainForm.cs">
