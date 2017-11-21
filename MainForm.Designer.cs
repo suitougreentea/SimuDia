@@ -30,26 +30,26 @@
         {
             this.MainPicture = new System.Windows.Forms.PictureBox();
             this.MainSplit = new System.Windows.Forms.SplitContainer();
-            this.PanelPicture = new System.Windows.Forms.Panel();
-            this.ButtonZoomInV = new System.Windows.Forms.Button();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.ButtonZoomOutV = new System.Windows.Forms.Button();
-            this.ButtonZoomInH = new System.Windows.Forms.Button();
+            this.ButtonZoomInV = new System.Windows.Forms.Button();
             this.ButtonZoomOutH = new System.Windows.Forms.Button();
+            this.ButtonZoomInH = new System.Windows.Forms.Button();
+            this.PanelPicture = new System.Windows.Forms.Panel();
             this.SubSplit = new System.Windows.Forms.SplitContainer();
             this.ListLine = new System.Windows.Forms.CheckedListBox();
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.TextInfo = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.MainPicture)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MainSplit)).BeginInit();
             this.MainSplit.Panel1.SuspendLayout();
             this.MainSplit.Panel2.SuspendLayout();
             this.MainSplit.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             this.PanelPicture.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SubSplit)).BeginInit();
             this.SubSplit.Panel1.SuspendLayout();
             this.SubSplit.Panel2.SuspendLayout();
             this.SubSplit.SuspendLayout();
-            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // MainPicture
@@ -80,31 +80,25 @@
             this.MainSplit.SplitterDistance = 354;
             this.MainSplit.TabIndex = 2;
             // 
-            // PanelPicture
+            // tableLayoutPanel1
             // 
-            this.PanelPicture.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.PanelPicture.AutoScroll = true;
-            this.PanelPicture.Controls.Add(this.MainPicture);
-            this.PanelPicture.Location = new System.Drawing.Point(0, 0);
-            this.PanelPicture.Margin = new System.Windows.Forms.Padding(0);
-            this.PanelPicture.Name = "PanelPicture";
-            this.PanelPicture.Size = new System.Drawing.Size(350, 406);
-            this.PanelPicture.TabIndex = 4;
-            // 
-            // ButtonZoomInV
-            // 
-            this.ButtonZoomInV.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ButtonZoomInV.Location = new System.Drawing.Point(174, 0);
-            this.ButtonZoomInV.Margin = new System.Windows.Forms.Padding(0);
-            this.ButtonZoomInV.Name = "ButtonZoomInV";
-            this.ButtonZoomInV.Size = new System.Drawing.Size(87, 28);
-            this.ButtonZoomInV.TabIndex = 2;
-            this.ButtonZoomInV.TabStop = false;
-            this.ButtonZoomInV.Text = "↕+";
-            this.ButtonZoomInV.UseVisualStyleBackColor = true;
-            this.ButtonZoomInV.Click += new System.EventHandler(this.ButtonZoomInV_Click);
+            this.tableLayoutPanel1.ColumnCount = 4;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel1.Controls.Add(this.ButtonZoomOutV, 3, 0);
+            this.tableLayoutPanel1.Controls.Add(this.ButtonZoomInV, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.ButtonZoomOutH, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.ButtonZoomInH, 0, 0);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 406);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 1;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(350, 28);
+            this.tableLayoutPanel1.TabIndex = 1;
             // 
             // ButtonZoomOutV
             // 
@@ -119,18 +113,18 @@
             this.ButtonZoomOutV.UseVisualStyleBackColor = true;
             this.ButtonZoomOutV.Click += new System.EventHandler(this.ButtonZoomOutV_Click);
             // 
-            // ButtonZoomInH
+            // ButtonZoomInV
             // 
-            this.ButtonZoomInH.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ButtonZoomInH.Location = new System.Drawing.Point(0, 0);
-            this.ButtonZoomInH.Margin = new System.Windows.Forms.Padding(0);
-            this.ButtonZoomInH.Name = "ButtonZoomInH";
-            this.ButtonZoomInH.Size = new System.Drawing.Size(87, 28);
-            this.ButtonZoomInH.TabIndex = 2;
-            this.ButtonZoomInH.TabStop = false;
-            this.ButtonZoomInH.Text = "↔+";
-            this.ButtonZoomInH.UseVisualStyleBackColor = true;
-            this.ButtonZoomInH.Click += new System.EventHandler(this.ButtonZoomInH_Click);
+            this.ButtonZoomInV.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ButtonZoomInV.Location = new System.Drawing.Point(174, 0);
+            this.ButtonZoomInV.Margin = new System.Windows.Forms.Padding(0);
+            this.ButtonZoomInV.Name = "ButtonZoomInV";
+            this.ButtonZoomInV.Size = new System.Drawing.Size(87, 28);
+            this.ButtonZoomInV.TabIndex = 2;
+            this.ButtonZoomInV.TabStop = false;
+            this.ButtonZoomInV.Text = "↕+";
+            this.ButtonZoomInV.UseVisualStyleBackColor = true;
+            this.ButtonZoomInV.Click += new System.EventHandler(this.ButtonZoomInV_Click);
             // 
             // ButtonZoomOutH
             // 
@@ -144,6 +138,32 @@
             this.ButtonZoomOutH.Text = "↔-";
             this.ButtonZoomOutH.UseVisualStyleBackColor = true;
             this.ButtonZoomOutH.Click += new System.EventHandler(this.ButtonZoomOutH_Click);
+            // 
+            // ButtonZoomInH
+            // 
+            this.ButtonZoomInH.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ButtonZoomInH.Location = new System.Drawing.Point(0, 0);
+            this.ButtonZoomInH.Margin = new System.Windows.Forms.Padding(0);
+            this.ButtonZoomInH.Name = "ButtonZoomInH";
+            this.ButtonZoomInH.Size = new System.Drawing.Size(87, 28);
+            this.ButtonZoomInH.TabIndex = 2;
+            this.ButtonZoomInH.TabStop = false;
+            this.ButtonZoomInH.Text = "↔+";
+            this.ButtonZoomInH.UseVisualStyleBackColor = true;
+            this.ButtonZoomInH.Click += new System.EventHandler(this.ButtonZoomInH_Click);
+            // 
+            // PanelPicture
+            // 
+            this.PanelPicture.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.PanelPicture.AutoScroll = true;
+            this.PanelPicture.Controls.Add(this.MainPicture);
+            this.PanelPicture.Location = new System.Drawing.Point(0, 0);
+            this.PanelPicture.Margin = new System.Windows.Forms.Padding(0);
+            this.PanelPicture.Name = "PanelPicture";
+            this.PanelPicture.Size = new System.Drawing.Size(350, 406);
+            this.PanelPicture.TabIndex = 4;
             // 
             // SubSplit
             // 
@@ -177,26 +197,6 @@
             this.ListLine.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.ListLine_ItemCheck);
             this.ListLine.SelectedIndexChanged += new System.EventHandler(this.ListLine_SelectedIndexChanged);
             // 
-            // tableLayoutPanel1
-            // 
-            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel1.ColumnCount = 4;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.Controls.Add(this.ButtonZoomOutV, 3, 0);
-            this.tableLayoutPanel1.Controls.Add(this.ButtonZoomInV, 2, 0);
-            this.tableLayoutPanel1.Controls.Add(this.ButtonZoomOutH, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.ButtonZoomInH, 0, 0);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 406);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 1;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(350, 28);
-            this.tableLayoutPanel1.TabIndex = 1;
-            // 
             // TextInfo
             // 
             this.TextInfo.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -214,7 +214,7 @@
             this.ClientSize = new System.Drawing.Size(507, 437);
             this.Controls.Add(this.MainSplit);
             this.Name = "MainForm";
-            this.Text = "Diagram Viewer";
+            this.Text = "SimutransDiagram Viewer 0.7.0";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.onLoad);
             ((System.ComponentModel.ISupportInitialize)(this.MainPicture)).EndInit();
@@ -222,12 +222,12 @@
             this.MainSplit.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.MainSplit)).EndInit();
             this.MainSplit.ResumeLayout(false);
+            this.tableLayoutPanel1.ResumeLayout(false);
             this.PanelPicture.ResumeLayout(false);
             this.SubSplit.Panel1.ResumeLayout(false);
             this.SubSplit.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.SubSplit)).EndInit();
             this.SubSplit.ResumeLayout(false);
-            this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
