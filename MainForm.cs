@@ -134,6 +134,7 @@ namespace simutrans_diagram
             watcher.IncludeSubdirectories = false;
             watcher.Changed += (_, __) =>
             {
+                // TODO: Dirty workaround to avoid locking issue
                 System.Threading.Thread.Sleep(100);
                 loadAndSetupDiagram();
             };

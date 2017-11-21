@@ -8,24 +8,23 @@ namespace simutrans_diagram
 {
     class Diagram
     {
-        private long calculateTripTime(LineStationData from, LineStationData to)
+        private long calculateTripTime(LineStationData from, LineStationData to, int lineId)
         {
-            var result = _calculateTripTime(from, to);
+            var result = _calculateTripTime(from, to, lineId);
             if (result >= 0) return result;
-            return _calculateTripTime(to, from);
+            return _calculateTripTime(to, from, lineId);
         }
 
-        private long _calculateTripTime(LineStationData from, LineStationData to)
+        private long _calculateTripTime(LineStationData from, LineStationData to, int lineId)
         {
             var time = 0L;
 
             var fromStationIndex = stations.IndexOf(from.station);
             var toStationIndex = stations.IndexOf(to.station);
-            var timesIndex = times.FindIndex(ce => ce.fromStation == from.station && ce.toStation == to.station);
-            if (timesIndex >= 0)
+            var matchedTimes = times.Where(it => it.fromStation == from.station && it.toStation == to.station && it.id == lineId);
+            if (matchedTimes.Count() > 0)
             {
-                var entry = times[timesIndex];
-                time = (long)entry.times.Average();
+                time = (long)matchedTimes.Select(it => it.time).Average();
             }
             else if (from.station.name == to.station.name)
             {
@@ -41,8 +40,8 @@ namespace simutrans_diagram
                 {
                     var expandedFrom = expanded[j - 1];
                     var expandedTo = expanded[j];
-                    var expandedTimesIndex = times.FindIndex(ce => ce.fromStation == expandedFrom && ce.toStation == expandedTo);
-                    if (expandedTimesIndex >= 0) time += (long)times[expandedTimesIndex].times.Average();
+                    var matchedExpandedTimes = times.Where(it => it.fromStation == expandedFrom && it.toStation == expandedTo && it.id == lineId);
+                    if (matchedExpandedTimes.Count() > 0) time += (long)matchedExpandedTimes.Select(it => it.time).Average();
                     else
                     {
                         success = false;
@@ -80,15 +79,13 @@ namespace simutrans_diagram
             {
                 var upStation = stations[i - 1];
                 var downStation = stations[i];
-                var forIndex = times.FindIndex(it => it.fromStation == upStation && it.toStation == downStation);
-                var revIndex = times.FindIndex(it => it.fromStation == downStation && it.toStation == upStation);
-                var ticksList = new List<Double>(2);
-                if (forIndex >= 0) ticksList.Add(times[forIndex].times.Average());
-                if (revIndex >= 0) ticksList.Add(times[revIndex].times.Average());
-                if (ticksList.Count == 0) accumulatedTicks.Add(0);
+                var forTimes = times.Where(it => it.fromStation == upStation && it.toStation == downStation);
+                var revTimes = times.Where(it => it.fromStation == downStation && it.toStation == upStation);
+                var bidiTimes = forTimes.Concat(revTimes);
+                if (bidiTimes.Count() == 0) accumulatedTicks.Add(0);
                 else
                 {
-                    var meanTicks = ticksList.Average();
+                    var meanTicks = bidiTimes.Select(it => it.time).Average();
                     accumulatedTicks.Add(accumulatedTicks[i - 1] + (long)meanTicks);
                 }
             }
@@ -103,6 +100,7 @@ namespace simutrans_diagram
                 {
                     var from = it.stations[i];
                     var to = it.stations[(i + 1) % it.stations.Count];
+                    var timeId = from.timeId ?? it.defaultTimeId ?? 0;
 
                     var arrival = accum;
 
@@ -140,7 +138,7 @@ namespace simutrans_diagram
                     var departure = accum;
 
                     long tripTime;
-                    tripTime = calculateTripTime(from, to);
+                    tripTime = calculateTripTime(from, to, timeId);
                     if (from.tripTime != null) tripTime = from.tripTime.Value;
 
                     if (from.tripTimeOffset != null) tripTime += from.tripTimeOffset.Value;

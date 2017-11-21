@@ -8,24 +8,39 @@ shift_divisor = 1440
 終着駅
 
 [RawTimes]
-# 各駅停車の計測
-始発駅 -> 中間駅: 0300
+# デフォルトのtime_idは0
+# 各駅停車Aの計測
+始発駅 -> 中間駅: 0400
 中間駅 -> 終着駅: 0300
+
+# 各駅停車Bの計測
+<time_id=1> 始発駅 -> 中間駅: 0300
+<time_id=1> 中間駅 -> 終着駅: 0400
 
 # 急行の計測
 始発駅 -> 終着駅: 0500
 
 [Lines]
-name = 各停
-divisor = 16
+# デフォルトのtime_idは0
+name = 各停0
+divisor = 8
 <reverse> 始発駅
 <wait=0300> 中間駅
 <reverse, wait=0300> 終着駅
-<wait=0300>中間駅
+<wait=0300> 中間駅
+-----
+name = 各停1
+divisor = 8
+default_time_id = 1
+<shift=2400, reverse> 始発駅
+<wait=0300> 中間駅
+<reverse, wait=0300> 終着駅
+<wait=0300> 中間駅
 -----
 name = 急行
 divisor = 16
 color = #FF0000
 width = 2
-<reverse, shift=0200> 始発駅
+# time_idを明示的に指定できます
+<time_id=0, reverse, shift=0300> 始発駅
 <reverse, wait=0700> 終着駅

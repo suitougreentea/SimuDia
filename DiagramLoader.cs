@@ -47,6 +47,7 @@ namespace simutrans_diagram
         private List<LineStationData> currentLineStations;
         private long? currentLineDefaultLoadingTime;
         private long? currentLineDefaultReversingTime;
+        private int? currentLineDefaultTimeId;
 
         private List<Station> stations = new List<Station>();
         private List<TimeData> times = new List<TimeData>();
@@ -114,10 +115,46 @@ namespace simutrans_diagram
         {
             if (input.StartsWith("<"))
             {
-                var split = Regex.Match(input, @"<(.*)>(.*)");
+                var split = Regex.Match(input, @"<(.*?)>(.*)");
                 return Tuple.Create(parseInlineOptions(split.Groups[1].Value.Trim()), split.Groups[2].Value.Trim());
             }
             return Tuple.Create(new List<KeyValuePair<string, string>>(), input);
+        }
+
+        private List<TimeData> parseRawTimes(string input)
+        {
+            var entry = parseEntryWithInlineOptions(input);
+            var timeId = 0;
+            entry.Item1.ForEach(it =>
+            {
+                if (it.Key == "time_id") timeId = int.Parse(it.Value);
+            });
+
+            var body = entry.Item2;
+            var split = Regex.Match(body, @"(.*)->(.*):(.*)");
+            var fromStation = parseStation(split.Groups[1].Value.Trim());
+            var toStation = parseStation(split.Groups[2].Value.Trim());
+
+            var fromStationIndex = stations.IndexOf(fromStation);
+            var toStationIndex = stations.IndexOf(toStation);
+            if (fromStationIndex == -1) throw new DiagramLoadingError(i, "Undefined station: " + fromStation);
+            if (toStationIndex == -1) throw new DiagramLoadingError(i, "Undefined station: " + toStation);
+
+            var rawTimes = split.Groups[3].Value.Trim();
+            return rawTimes.Split(',').Select(it => {
+                var trimmed = it.Trim();
+                if (trimmed.IndexOf("-") >= 0)
+                {
+                    var multipleTimeSplit = Regex.Match(trimmed, @"(.*)-(.*)");
+                    var fromTime = parseTime(multipleTimeSplit.Groups[1].Value.Trim()).Ticks;
+                    var toTime = parseTime(multipleTimeSplit.Groups[2].Value.Trim()).Ticks;
+                    var time = toTime - fromTime;
+                    if (_monthLength == null) throw new AssertionFailedException(i);
+                    while (time < 0) time += _monthLength.Value;
+                    return time;
+                }
+                else return parseTime(trimmed).Ticks;
+            }).Select(it => new TimeData(fromStation, toStation, it, timeId)).ToList();
         }
 
         private void resetCurrentLineData()
@@ -129,6 +166,7 @@ namespace simutrans_diagram
             currentLineStations = new List<LineStationData>();
             currentLineDefaultLoadingTime = null;
             currentLineDefaultReversingTime = null;
+            currentLineDefaultTimeId = null;
         }
 
         private void putLine()
@@ -140,6 +178,7 @@ namespace simutrans_diagram
                 currentLineColor,
                 currentLineDefaultLoadingTime,
                 currentLineDefaultReversingTime,
+                currentLineDefaultTimeId,
                 currentLineStations));
             resetCurrentLineData();
         }
@@ -186,31 +225,7 @@ namespace simutrans_diagram
                     }
                     if (mode == "RawTimes")
                     {
-                        var split = Regex.Match(l, @"(.*)->(.*):(.*)");
-                        var fromStation = parseStation(split.Groups[1].Value.Trim());
-                        var toStation = parseStation(split.Groups[2].Value.Trim());
-                        var fromStationIndex = stations.IndexOf(fromStation);
-                        var toStationIndex = stations.IndexOf(toStation);
-                        if (fromStationIndex == -1) throw new DiagramLoadingError(i, "Undefined station");
-                        if (toStationIndex == -1) throw new AssertionFailedException(i);
-                        var rawTime = split.Groups[3].Value.Trim();
-                        var timesList = rawTime.Split(',').Select(s => {
-                            var trimmed = s.Trim();
-                            if (trimmed.IndexOf("-") >= 0)
-                            {
-                                var multipleTimeSplit = Regex.Match(l, @"(.*)-(.*)");
-                                var fromTime = parseTime(multipleTimeSplit.Groups[1].Value.Trim()).Ticks;
-                                var toTime = parseTime(multipleTimeSplit.Groups[2].Value.Trim()).Ticks;
-                                var time = toTime - fromTime;
-                                if (_monthLength == null) throw new AssertionFailedException(i);
-                                while (time < 0) time += _monthLength.Value;
-                                return time;
-                            }
-                            else return parseTime(trimmed).Ticks;
-                        }).ToList();
-                        var sameTimeDataIndex = times.FindIndex(it => it.fromStation == fromStation && it.toStation == toStation);
-                        if (sameTimeDataIndex >= 0) times[sameTimeDataIndex].times.AddRange(timesList);
-                        else times.Add(new TimeData(fromStation, toStation, timesList));
+                        times.AddRange(parseRawTimes(l));
                     }
                     if (mode == "Lines")
                     {
@@ -231,6 +246,7 @@ namespace simutrans_diagram
                             if (key == "color") currentLineColor = ColorTranslator.FromHtml(value);
                             if (key == "default_loading_time") currentLineDefaultLoadingTime = parseTime(value).Ticks;
                             if (key == "default_reversing_time") currentLineDefaultReversingTime = parseTime(value).Ticks;
+                            if (key == "default_time_id") currentLineDefaultTimeId = int.Parse(value);
                         }
                         else
                         {
@@ -240,6 +256,7 @@ namespace simutrans_diagram
                             long? loadingTime = null;
                             bool reverse = false;
                             long? reversingTime = null;
+                            int? timeId = null;
                             long? tripTime = null;
                             long? tripTimeOffset = null;
 
@@ -252,6 +269,7 @@ namespace simutrans_diagram
                                 if (key == "shift_num") shiftNum = int.Parse(value);
                                 if (key == "wait") waitingTime = parseTime(value).Ticks;
                                 if (key == "load") loadingTime = parseTime(value).Ticks;
+                                if (key == "time_id") timeId = int.Parse(value);
                                 if (key == "trip") tripTime = parseTime(value).Ticks;
                                 if (key == "trip_offset") tripTimeOffset = parseOffsetTime(value).Ticks;
                                 if (key == "reverse")
@@ -262,7 +280,9 @@ namespace simutrans_diagram
                             });
 
                             Station station = parseStation(entry.Item2);
-                            currentLineStations.Add(new LineStationData(station, shiftTime, shiftNum, waitingTime, loadingTime, reverse, reversingTime, tripTime, tripTimeOffset));
+                            var stationIndex = stations.IndexOf(station);
+                            if (stationIndex == -1) throw new DiagramLoadingError(i, "Undefined station: " + station);
+                            currentLineStations.Add(new LineStationData(station, shiftTime, shiftNum, waitingTime, loadingTime, reverse, reversingTime, timeId, tripTime, tripTimeOffset));
                         }
                     }
                 }

@@ -42,18 +42,20 @@ namespace simutrans_diagram
     {
         public readonly Station fromStation;
         public readonly Station toStation;
-        public readonly List<long> times;
+        public readonly long time;
+        public readonly int id;
 
-        public TimeData(Station fromStation, Station toStation, List<long> times)
+        public TimeData(Station fromStation, Station toStation, long time, int id)
         {
             this.fromStation = fromStation;
             this.toStation = toStation;
-            this.times = times;
+            this.time = time;
+            this.id = id;
         }
 
         public override string ToString()
         {
-            return $"{fromStation} -> {toStation}: {String.Join(",", times)}";
+            return $"{fromStation} -> {toStation}: {time}";
         }
     }
     public struct LineStationData
@@ -78,11 +80,12 @@ namespace simutrans_diagram
 
         // Trip time is that between NEXT station
         // trip: you can override trip time
+        public readonly int? timeId;
         public readonly long? tripTime;
         // trip_offset
         public readonly long? tripTimeOffset;
 
-        public LineStationData(Station station, long? shiftTime, int? shiftNum, long? waitingTime, long? loadingTime, bool reverse, long? reversingTime, long? tripTime, long? tripTimeOffset)
+        public LineStationData(Station station, long? shiftTime, int? shiftNum, long? waitingTime, long? loadingTime, bool reverse, long? reversingTime, int? timeId, long? tripTime, long? tripTimeOffset)
         {
             this.station = station;
             this.shiftTime = shiftTime;
@@ -91,6 +94,7 @@ namespace simutrans_diagram
             this.loadingTime = loadingTime;
             this.reverse = reverse;
             this.reversingTime = reversingTime;
+            this.timeId = timeId;
             this.tripTime = tripTime;
             this.tripTimeOffset = tripTimeOffset;
         }
@@ -108,9 +112,10 @@ namespace simutrans_diagram
         public readonly Color color;
         public readonly long? defaultLoadingTime;
         public readonly long? defaultReversingTime;
+        public readonly int? defaultTimeId;
         public readonly List<LineStationData> stations;
 
-        public LineData(string name, int divisor, float width, Color color, long? defaultLoadingTime, long? defaultReversingTime, List<LineStationData> stations)
+        public LineData(string name, int divisor, float width, Color color, long? defaultLoadingTime, long? defaultReversingTime, int? defaultTimeId, List<LineStationData> stations)
         {
             this.name = name;
             this.divisor = divisor;
@@ -118,6 +123,7 @@ namespace simutrans_diagram
             this.color = color;
             this.defaultLoadingTime = defaultLoadingTime;
             this.defaultReversingTime = defaultReversingTime;
+            this.defaultTimeId = defaultTimeId;
             this.stations = stations;
         }
 
