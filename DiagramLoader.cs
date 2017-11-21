@@ -59,6 +59,18 @@ namespace simutrans_diagram
             resetCurrentLineData();
         }
 
+        private int parseInt(string input)
+        {
+            try { return int.Parse(input); }
+            catch (FormatException e) { throw new DiagramLoadingError(i, "Invalid number format: expected integer, found " + input); };
+        }
+
+        private float parseFloat(string input)
+        {
+            try { return float.Parse(input); }
+            catch (FormatException e) { throw new DiagramLoadingError(i, "Invalid number format: expected float, found " + input); }
+        }
+
         private TimeSpan parseOffsetTime(string input)
         {
             var match = Regex.Match(input, @"([+-]?)(.*)");
@@ -73,9 +85,9 @@ namespace simutrans_diagram
         private TimeSpan parseTime(string input)
         {
             var hms = Regex.Match(input, @"([0-9]*)([0-5][0-9])([0-5][0-9])");
-            var hour = hms.Groups[1].Value.Length == 0 ? 0 : int.Parse(hms.Groups[1].Value);
-            var minute = int.Parse(hms.Groups[2].Value);
-            var second = int.Parse(hms.Groups[3].Value);
+            var hour = hms.Groups[1].Value.Length == 0 ? 0 : parseInt(hms.Groups[1].Value);
+            var minute = parseInt(hms.Groups[2].Value);
+            var second = parseInt(hms.Groups[3].Value);
             return new TimeSpan(hour, minute, second);
         }
     
@@ -85,7 +97,7 @@ namespace simutrans_diagram
             {
                 var split = Regex.Match(input, @"(.*)@\s*([0-9]*)");
                 var name = split.Groups[1].Value.Trim();
-                var id = int.Parse(split.Groups[2].Value);
+                var id = parseInt(split.Groups[2].Value);
                 return new Station(name, id);
             }
             else return new Station(input, 0);
@@ -127,7 +139,7 @@ namespace simutrans_diagram
             var timeId = 0;
             entry.Item1.ForEach(it =>
             {
-                if (it.Key == "time_id") timeId = int.Parse(it.Value);
+                if (it.Key == "time_id") timeId = parseInt(it.Value);
             });
 
             var body = entry.Item2;
@@ -215,7 +227,7 @@ namespace simutrans_diagram
                         var value = option.Value;
 
                         if (key == "month_length") _monthLength = parseTime(value).Ticks;
-                        if (key == "shift_divisor") _shiftDivisor = int.Parse(value);
+                        if (key == "shift_divisor") _shiftDivisor = parseInt(value);
                         if (key == "default_loading_time") defaultLoadingTime = parseTime(value).Ticks;
                         if (key == "default_reversing_time") defaultReversingTime = parseTime(value).Ticks;
                     }
@@ -240,13 +252,13 @@ namespace simutrans_diagram
                             var value = option.Value;
 
                             if (key == "name") currentLineName = value;
-                            if (key == "divisor") currentLineDivisor = int.Parse(value);
+                            if (key == "divisor") currentLineDivisor = parseInt(value);
                             if (key == "divisor_by_every" && currentLineDivisor == null) currentLineDivisor = (int)(_monthLength / parseTime(value).Ticks);
-                            if (key == "width") currentLineWidth = float.Parse(value);
+                            if (key == "width") currentLineWidth = parseFloat(value);
                             if (key == "color") currentLineColor = ColorTranslator.FromHtml(value);
                             if (key == "default_loading_time") currentLineDefaultLoadingTime = parseTime(value).Ticks;
                             if (key == "default_reversing_time") currentLineDefaultReversingTime = parseTime(value).Ticks;
-                            if (key == "default_time_id") currentLineDefaultTimeId = int.Parse(value);
+                            if (key == "default_time_id") currentLineDefaultTimeId = parseInt(value);
                         }
                         else
                         {
@@ -266,10 +278,10 @@ namespace simutrans_diagram
                                 var key = it.Key;
                                 var value = it.Value;
                                 if (key == "shift") shiftTime = parseTime(value).Ticks;
-                                if (key == "shift_num") shiftNum = int.Parse(value);
+                                if (key == "shift_num") shiftNum = parseInt(value);
                                 if (key == "wait") waitingTime = parseTime(value).Ticks;
                                 if (key == "load") loadingTime = parseTime(value).Ticks;
-                                if (key == "time_id") timeId = int.Parse(value);
+                                if (key == "time_id") timeId = parseInt(value);
                                 if (key == "trip") tripTime = parseTime(value).Ticks;
                                 if (key == "trip_offset") tripTimeOffset = parseOffsetTime(value).Ticks;
                                 if (key == "reverse")
