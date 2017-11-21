@@ -116,7 +116,7 @@ namespace simutrans_diagram
                 ButtonZoomOutH.Enabled = false;
                 ButtonZoomInV.Enabled = false;
                 ButtonZoomOutV.Enabled = false;
-                TextInfo.SelectedText = "*** Error Loading Diagram ***";
+                TextInfo.SelectedText = "*** Error Loading Diagram ***\n";
                 TextInfo.SelectedText = $"At line {e.line}: {e.message}";
             }
         }
