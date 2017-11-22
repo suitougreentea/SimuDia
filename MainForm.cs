@@ -128,7 +128,26 @@ namespace Suitougreentea.SimuDia
         private void OnLoad(object sender, EventArgs e)
         {
             var args = Environment.GetCommandLineArgs();
-            path = Path.GetFullPath(args[1]);
+            if (args.Count() <= 1)
+            {
+                OpenFileDialog dialog = new OpenFileDialog();
+
+                dialog.Filter = "(*.simtt)|*.simtt";
+                dialog.Title = "Open File";
+                dialog.RestoreDirectory = true;
+                dialog.CheckFileExists = true;
+                dialog.CheckPathExists = true;
+
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    path = Path.GetFullPath(dialog.FileName);
+                }
+                else
+                {
+                    Application.Exit();
+                }
+            }
+            else path = Path.GetFullPath(args[1]);
 
             LoadAndSetupDiagram();
 
