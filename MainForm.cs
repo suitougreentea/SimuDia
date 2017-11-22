@@ -37,7 +37,7 @@ namespace Suitougreentea.SimuDia
 
         private void Redraw()
         {
-            var bitmap = renderer.render();
+            var bitmap = renderer.Render();
             MainPicture.Image = bitmap;
             MainPicture.Size = new Size(bitmap.Width, bitmap.Height);
         }
@@ -130,14 +130,14 @@ namespace Suitougreentea.SimuDia
             var args = Environment.GetCommandLineArgs();
             if (args.Count() <= 1)
             {
-                OpenFileDialog dialog = new OpenFileDialog();
-
-                dialog.Filter = "(*.simtt)|*.simtt";
-                dialog.Title = "Open File";
-                dialog.RestoreDirectory = true;
-                dialog.CheckFileExists = true;
-                dialog.CheckPathExists = true;
-
+                OpenFileDialog dialog = new OpenFileDialog()
+                {
+                    Filter = "(*.simtt)|*.simtt",
+                    Title = "Open File",
+                    RestoreDirectory = true,
+                    CheckFileExists = true,
+                    CheckPathExists = true
+                };
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     path = Path.GetFullPath(dialog.FileName);
@@ -168,25 +168,25 @@ namespace Suitougreentea.SimuDia
 
         private void ButtonZoomInH_Click(object sender, EventArgs e)
         {
-            renderer.zoomInHorizontal();
+            renderer.ZoomInHorizontal();
             Redraw();
         }
 
         private void ButtonZoomOutH_Click(object sender, EventArgs e)
         {
-            renderer.zoomOutHorizontal();
+            renderer.ZoomOutHorizontal();
             Redraw();
         }
 
         private void ButtonZoomInV_Click(object sender, EventArgs e)
         {
-            renderer.zoomInVertical();
+            renderer.ZoomInVertical();
             Redraw();
         }
 
         private void ButtonZoomOutV_Click(object sender, EventArgs e)
         {
-            renderer.zoomOutVertical();
+            renderer.ZoomOutVertical();
             Redraw();
         }
 

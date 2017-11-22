@@ -42,32 +42,32 @@ namespace Suitougreentea.SimuDia
             protruding = new List<List<ProtrudingArea>>(diagram.stations.Count);
             for (var i = 0; i < diagram.stations.Count; i++) protruding.Add(new List<ProtrudingArea>());
 
-            updateHorizontalScale();
-            updateVerticalScale();
+            UpdateHorizontalScale();
+            UpdateVerticalScale();
 
             var graphicsForMeasureString = Graphics.FromImage(new Bitmap(1, 1));
             stationNameWidth = (int)diagram.stations.Select(it => graphicsForMeasureString.MeasureString(it.name, font).Width).Max() + 20;
         }
 
-        private float timeToX(long time)
+        private float TimeToX(long time)
         {
             return time / horizontalScale;
         }
 
-        private void drawGrid(Pen pen, long every)
+        private void DrawGrid(Pen pen, long every)
         {
             for (var t = 0L; t < diagram.monthLength; t += every)
             {
-                var dx = timeToX(t);
+                var dx = TimeToX(t);
                 g.DrawLine(pen, dx, 0, dx, stationsHeight);
             }
         }
 
-        private void drawAxis(Font font, Brush brush, long every, StringFormat format)
+        private void DrawAxis(Font font, Brush brush, long every, StringFormat format)
         {
             for (var t = 0L; t < diagram.monthLength; t += every)
             {
-                var dx = timeToX(t);
+                var dx = TimeToX(t);
                 g.DrawString(new TimeSpan(t).ToString(), font, brush, dx, 0, format);
             }
         }
@@ -103,27 +103,27 @@ namespace Suitougreentea.SimuDia
             return result;
         }
 
-        private void drawLine(Pen pen, long fromTime, float fromY, long toTime, float toY)
+        private void DrawLine(Pen pen, long fromTime, float fromY, long toTime, float toY)
         {
             if (fromTime == toTime)
             {
-                var x = timeToX(fromTime);
+                var x = TimeToX(fromTime);
                 while (x < 0f) x += plotWidth;
                 while (x > plotWidth) x -= plotWidth;
                 g.DrawLine(pen, x, fromY, x, toY);
             }
             else
             {
-                NormalizeLines(timeToX(fromTime), fromY, timeToX(toTime), toY, plotWidth).ForEach(it =>
+                NormalizeLines(TimeToX(fromTime), fromY, TimeToX(toTime), toY, plotWidth).ForEach(it =>
                 {
                     g.DrawLine(pen, it.Item1, it.Item2);
                 });
             }
         }
 
-        public void drawProtrudingLine(Pen pen, bool upsideDownDirection, int stationIndex, long arrival, long departure)
+        public void DrawProtrudingLine(Pen pen, bool upsideDownDirection, int stationIndex, long arrival, long departure)
         {
-            var normalized = NormalizeLines(timeToX(arrival), 0f, timeToX(departure), 0f, plotWidth);
+            var normalized = NormalizeLines(TimeToX(arrival), 0f, TimeToX(departure), 0f, plotWidth);
             var y = stationY[stationIndex];
             float intervalY;
             ProtrudingDirection protrudingDirection;
@@ -153,13 +153,13 @@ namespace Suitougreentea.SimuDia
             }).Max();
 
             var protrudingOffset = Math.Min(5f * (protrudingLevel + 1), intervalY / 3f * 2f) * (protrudingDirection == ProtrudingDirection.DOWN ? 1 : -1);
-            drawLine(pen, arrival, y, arrival, y + protrudingOffset);
-            drawLine(pen, arrival, y + protrudingOffset, departure, y + protrudingOffset);
-            drawLine(pen, departure, y + protrudingOffset, departure, y);
+            DrawLine(pen, arrival, y, arrival, y + protrudingOffset);
+            DrawLine(pen, arrival, y + protrudingOffset, departure, y + protrudingOffset);
+            DrawLine(pen, departure, y + protrudingOffset, departure, y);
             protruding[stationIndex].AddRange(normalized.Select(it => new ProtrudingArea(it.Item1.X, it.Item2.X, protrudingLevel, protrudingDirection)));
         }
 
-        public Bitmap render()
+        public Bitmap Render()
         {
             foreach (var it in protruding) it.Clear();
 
@@ -176,15 +176,16 @@ namespace Suitougreentea.SimuDia
             g.Clear(Color.White);
 
             var brush = new SolidBrush(Color.Black);
-            StringFormat bottomAlignFormat = new StringFormat();
-            bottomAlignFormat.LineAlignment = StringAlignment.Far;
-
+            StringFormat bottomAlignFormat = new StringFormat()
+            {
+                LineAlignment = StringAlignment.Far
+            };
             g.TranslateTransform(leftMargin + stationNameWidth, topMargin);
 
-            drawGrid(Pens.LightGray, subsubGridAt);
-            drawGrid(Pens.DarkGray, subGridAt);
-            drawGrid(Pens.Black, mainGridAt);
-            drawAxis(font, brush, mainGridAt, bottomAlignFormat);
+            DrawGrid(Pens.LightGray, subsubGridAt);
+            DrawGrid(Pens.DarkGray, subGridAt);
+            DrawGrid(Pens.Black, mainGridAt);
+            DrawAxis(font, brush, mainGridAt, bottomAlignFormat);
 
             g.TranslateTransform(-stationNameWidth, 0);
             for (var i = 0; i < stations.Count; i++)
@@ -204,10 +205,11 @@ namespace Suitougreentea.SimuDia
                 var reverseDiv = lineTimes[i].wholeTripTime + lineTimes[i].list[0].essentialStoppingTime / (monthLength / it.divisor);
 
                 var pen = new Pen(it.color, it.width);
-                var penDashed = new Pen(it.color, it.width);
-                penDashed.DashPattern = new float[] { 3f, 3f };
-
-                for(var n = 0; n < it.divisor; n++)
+                var penDashed = new Pen(it.color, it.width)
+                {
+                    DashPattern = new float[] { 3f, 3f }
+                };
+                for (var n = 0; n < it.divisor; n++)
                 {
                     var divOffset = monthLength / it.divisor * n;
                     var lastStationIndex = stations.IndexOf(it.stations.Last().station);
@@ -230,9 +232,9 @@ namespace Suitougreentea.SimuDia
                         var newUpsideDownDirection = fromStationIndex > toStationIndex;
                         var reverseDirection = upsideDownDirection != newUpsideDownDirection;
                         upsideDownDirection = newUpsideDownDirection;
-                        if (reverseDirection) drawProtrudingLine(currentPen, upsideDownDirection, fromStationIndex, fromArrival, fromDeparture);
-                        else drawLine(currentPen, fromTimeData.arrival + divOffset, fromY, fromTimeData.departure + divOffset, fromY);
-                        drawLine(currentPen, fromTimeData.departure + divOffset, fromY, fromTimeData.departure + fromTimeData.tripTime + divOffset, toY);
+                        if (reverseDirection) DrawProtrudingLine(currentPen, upsideDownDirection, fromStationIndex, fromArrival, fromDeparture);
+                        else DrawLine(currentPen, fromTimeData.arrival + divOffset, fromY, fromTimeData.departure + divOffset, fromY);
+                        DrawLine(currentPen, fromTimeData.departure + divOffset, fromY, fromTimeData.departure + fromTimeData.tripTime + divOffset, toY);
                     }
                 }
             }
@@ -241,7 +243,7 @@ namespace Suitougreentea.SimuDia
             return bitmap;
         }
 
-        public void updateHorizontalScale()
+        public void UpdateHorizontalScale()
         {
             plotWidth = (int)(basePlotWidth * Math.Pow(2.0, horizontalZoom / 2.0));
             horizontalScale = diagram.monthLength / plotWidth;
@@ -251,7 +253,7 @@ namespace Suitougreentea.SimuDia
             subsubGridAt = new TimeSpan(0, 3, 0).Ticks;
         }
 
-        public void updateVerticalScale() {
+        public void UpdateVerticalScale() {
             stationY.Clear();
             stationY.Add(0L);
             var baseIndex = 0;
@@ -271,28 +273,28 @@ namespace Suitougreentea.SimuDia
             height = topMargin + stationsHeight + bottomMargin;
         }
 
-        public void zoomInHorizontal()
+        public void ZoomInHorizontal()
         {
             horizontalZoom++;
-            updateHorizontalScale();
+            UpdateHorizontalScale();
         }
 
-        public void zoomOutHorizontal()
+        public void ZoomOutHorizontal()
         {
             horizontalZoom--;
-            updateHorizontalScale();
+            UpdateHorizontalScale();
         }
 
-        public void zoomInVertical()
+        public void ZoomInVertical()
         {
             verticalZoom++;
-            updateVerticalScale();
+            UpdateVerticalScale();
         }
 
-        public void zoomOutVertical()
+        public void ZoomOutVertical()
         {
             verticalZoom--;
-            updateVerticalScale();
+            UpdateVerticalScale();
         }
     }
 }

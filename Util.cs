@@ -9,7 +9,7 @@ namespace Suitougreentea.SimuDia
 {
     class Util
     {
-        public static List<Station> expandStation(List<Station> list, Station from, Station to)
+        public static List<Station> ExpandStation(List<Station> list, Station from, Station to)
         {
             var fromIndex = list.IndexOf(from);
             var toIndex = list.IndexOf(to);

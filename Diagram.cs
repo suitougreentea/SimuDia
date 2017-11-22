@@ -8,14 +8,14 @@ namespace Suitougreentea.SimuDia
 {
     class Diagram
     {
-        private long calculateTripTime(LineStationData from, LineStationData to, int lineId)
+        private long CalculateTripTime(LineStationData from, LineStationData to, int lineId)
         {
-            var result = _calculateTripTime(from, to, lineId);
+            var result = _CalculateTripTime(from, to, lineId);
             if (result >= 0) return result;
-            return _calculateTripTime(to, from, lineId);
+            return _CalculateTripTime(to, from, lineId);
         }
 
-        private long _calculateTripTime(LineStationData from, LineStationData to, int lineId)
+        private long _CalculateTripTime(LineStationData from, LineStationData to, int lineId)
         {
             var time = 0L;
 
@@ -32,7 +32,7 @@ namespace Suitougreentea.SimuDia
             }
             else
             {
-                var expanded = Util.expandStation(stations, from.station, to.station);
+                var expanded = Util.ExpandStation(stations, from.station, to.station);
                 time = 0L;
                 var success = true;
 
@@ -73,8 +73,7 @@ namespace Suitougreentea.SimuDia
             this.times = times;
             this.lines = lines;
 
-            accumulatedTicks = new List<long>(stations.Count);
-            accumulatedTicks.Add(0L);
+            accumulatedTicks = new List<long>(stations.Count) { 0L };
             for (int i = 1; i < stations.Count; i++)
             {
                 var upStation = stations[i - 1];
@@ -119,7 +118,6 @@ namespace Suitougreentea.SimuDia
                     var essentialStoppingTime = Math.Max(loadingTime, from.reverse ? reversingTime : 0);
                     if (i == 0) arrival = 0;    // Will be set later
 
-                    long? actualStoppingTime = null;
                     if (shiftTime != null)
                     {
                         accum = shiftTime.Value;
@@ -133,7 +131,7 @@ namespace Suitougreentea.SimuDia
                     var departure = accum;
 
                     long tripTime;
-                    tripTime = calculateTripTime(from, to, timeId);
+                    tripTime = CalculateTripTime(from, to, timeId);
                     if (from.tripTime != null) tripTime = from.tripTime.Value;
 
                     if (from.tripTimeOffset != null) tripTime += from.tripTimeOffset.Value;
