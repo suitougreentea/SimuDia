@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace simutrans_diagram
+namespace Suitougreentea.SimuDia
 {
     static class Program
     {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace simutrans_diagram
+namespace Suitougreentea.SimuDia
 {
     public struct Station : IEquatable<Station>
     {
@@ -31,6 +31,17 @@ namespace simutrans_diagram
         public static bool operator !=(Station a, Station b)
         {
             return !(a == b);
+        }
+
+        override public bool Equals(object o)
+        {
+            if (o == null || this.GetType() != o.GetType()) return false;
+            return (this == (Station)o);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
 
         public override string ToString()

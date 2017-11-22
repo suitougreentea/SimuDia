@@ -10,7 +10,7 @@ using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.IO;
 
-namespace simutrans_diagram
+namespace Suitougreentea.SimuDia
 {
     public partial class MainForm : Form
     {
@@ -26,7 +26,7 @@ namespace simutrans_diagram
             InitializeComponent();
         }
 
-        private void updateVisibility()
+        private void UpdateVisibility()
         {
             renderer.lineVisibility.Clear();
             for (var i = 1; i < ListLine.Items.Count; i++)
@@ -35,14 +35,14 @@ namespace simutrans_diagram
             }
         }
 
-        private void redraw()
+        private void Redraw()
         {
             var bitmap = renderer.render();
             MainPicture.Image = bitmap;
             MainPicture.Size = new Size(bitmap.Width, bitmap.Height);
         }
 
-        private void setupComponents()
+        private void SetupComponents()
         {
             ignoreCheckEvent = true;
             string previousSelectedLineName = null;
@@ -83,11 +83,11 @@ namespace simutrans_diagram
             ButtonZoomInV.Enabled = true;
             ButtonZoomOutV.Enabled = true;
 
-            updateVisibility();
-            updateGlobalCheck();
+            UpdateVisibility();
+            UpdateGlobalCheck();
         }
 
-        private void updateGlobalCheck()
+        private void UpdateGlobalCheck()
         {
             var allChecked = true;
             for (var i = 1; i < ListLine.Items.Count; i++)
@@ -108,8 +108,8 @@ namespace simutrans_diagram
                 loader = new DiagramLoader(path);
                 diagram = loader.Load();
                 renderer = new Renderer(diagram);
-                setupComponents();
-                redraw();
+                SetupComponents();
+                Redraw();
             }
             catch (DiagramLoadingError e)
             {
@@ -150,25 +150,25 @@ namespace simutrans_diagram
         private void ButtonZoomInH_Click(object sender, EventArgs e)
         {
             renderer.zoomInHorizontal();
-            redraw();
+            Redraw();
         }
 
         private void ButtonZoomOutH_Click(object sender, EventArgs e)
         {
             renderer.zoomOutHorizontal();
-            redraw();
+            Redraw();
         }
 
         private void ButtonZoomInV_Click(object sender, EventArgs e)
         {
             renderer.zoomInVertical();
-            redraw();
+            Redraw();
         }
 
         private void ButtonZoomOutV_Click(object sender, EventArgs e)
         {
             renderer.zoomOutVertical();
-            redraw();
+            Redraw();
         }
 
         private void ListLine_SelectedIndexChanged(object sender, EventArgs e)
@@ -221,10 +221,10 @@ namespace simutrans_diagram
             }
             else
             {
-                updateGlobalCheck();
+                UpdateGlobalCheck();
             }
-            updateVisibility();
-            redraw();
+            UpdateVisibility();
+            Redraw();
         }
     }
 }
