@@ -42,11 +42,11 @@ namespace Suitougreentea.SimuDia
             protruding = new List<List<ProtrudingArea>>(diagram.stations.Count);
             for (var i = 0; i < diagram.stations.Count; i++) protruding.Add(new List<ProtrudingArea>());
 
-            UpdateHorizontalScale();
-            UpdateVerticalScale();
-
             var graphicsForMeasureString = Graphics.FromImage(new Bitmap(1, 1));
             stationNameWidth = (int)diagram.stations.Select(it => graphicsForMeasureString.MeasureString(it.name, font).Width).Max() + 20;
+
+            UpdateHorizontalScale();
+            UpdateVerticalScale();
         }
 
         private float TimeToX(long time)
