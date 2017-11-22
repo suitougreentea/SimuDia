@@ -71,6 +71,12 @@ namespace simutrans_diagram
             catch (FormatException e) { throw new DiagramLoadingError(i, "Invalid number format: expected float, found " + input); }
         }
 
+        private Color parseColor(string input)
+        {
+            try { return ColorTranslator.FromHtml(input); }
+            catch (Exception e) { throw new DiagramLoadingError(i, "Invalid color format: " + input); }
+        }
+
         private TimeSpan parseOffsetTime(string input)
         {
             var match = Regex.Match(input, @"([+-]?)(.*)");
@@ -255,7 +261,7 @@ namespace simutrans_diagram
                             if (key == "divisor") currentLineDivisor = parseInt(value);
                             if (key == "divisor_by_every" && currentLineDivisor == null) currentLineDivisor = (int)(_monthLength / parseTime(value).Ticks);
                             if (key == "width") currentLineWidth = parseFloat(value);
-                            if (key == "color") currentLineColor = ColorTranslator.FromHtml(value);
+                            if (key == "color") currentLineColor = parseColor(value);
                             if (key == "default_loading_time") currentLineDefaultLoadingTime = parseTime(value).Ticks;
                             if (key == "default_reversing_time") currentLineDefaultReversingTime = parseTime(value).Ticks;
                             if (key == "default_time_id") currentLineDefaultTimeId = parseInt(value);
