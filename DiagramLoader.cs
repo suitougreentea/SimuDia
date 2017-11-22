@@ -201,7 +201,7 @@ namespace simutrans_diagram
             resetCurrentLineData();
         }
 
-        public Diagram load()
+        public Diagram Load()
         {
             var textLines = System.IO.File.ReadAllLines(path);
             foreach (var _l in textLines)

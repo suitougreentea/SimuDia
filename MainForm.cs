@@ -100,13 +100,13 @@ namespace simutrans_diagram
             ignoreCheckEvent = false;
         }
         
-        private void loadAndSetupDiagram()
+        private void LoadAndSetupDiagram()
         {
             error = false;
             try
             {
                 loader = new DiagramLoader(path);
-                diagram = loader.load();
+                diagram = loader.Load();
                 renderer = new Renderer(diagram);
                 setupComponents();
                 redraw();
@@ -125,22 +125,24 @@ namespace simutrans_diagram
             }
         }
 
-        private void onLoad(object sender, EventArgs e)
+        private void OnLoad(object sender, EventArgs e)
         {
             var args = Environment.GetCommandLineArgs();
             path = Path.GetFullPath(args[1]);
 
-            loadAndSetupDiagram();
+            LoadAndSetupDiagram();
 
-            var watcher = new FileSystemWatcher(Path.GetDirectoryName(path));
-            watcher.Filter = Path.GetFileName(path);
-            watcher.SynchronizingObject = this;
-            watcher.IncludeSubdirectories = false;
+            var watcher = new FileSystemWatcher(Path.GetDirectoryName(path))
+            {
+                Filter = Path.GetFileName(path),
+                SynchronizingObject = this,
+                IncludeSubdirectories = false
+            };
             watcher.Changed += (_, __) =>
             {
                 // TODO: Dirty workaround to avoid locking issue
                 System.Threading.Thread.Sleep(100);
-                loadAndSetupDiagram();
+                LoadAndSetupDiagram();
             };
             watcher.EnableRaisingEvents = true;
         }

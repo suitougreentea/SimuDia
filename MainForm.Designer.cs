@@ -237,7 +237,7 @@
             this.Name = "MainForm";
             this.Text = "SimutransDiagram Viewer 0.7.5";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
-            this.Load += new System.EventHandler(this.onLoad);
+            this.Load += new System.EventHandler(this.OnLoad);
             ((System.ComponentModel.ISupportInitialize)(this.MainPicture)).EndInit();
             this.MainSplit.Panel1.ResumeLayout(false);
             this.MainSplit.Panel2.ResumeLayout(false);
