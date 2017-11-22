@@ -117,18 +117,13 @@ namespace Suitougreentea.SimuDia
                     if (from.station.name == to.station.name) loadingTime = 0L;
                     var reversingTime = from.reversingTime ?? it.defaultReversingTime ?? defaultReversingTime;
                     var essentialStoppingTime = Math.Max(loadingTime, from.reverse ? reversingTime : 0);
-                    if (i == 0)
-                    {
-                        // TODO
-                        if (shiftTime != null) arrival = shiftTime.Value;
-                        essentialStoppingTime = 0;
-                    }
+                    if (i == 0) arrival = 0;    // Will be set later
 
-                    long? plannedStoppingTime = null;
+                    long? actualStoppingTime = null;
                     if (shiftTime != null)
                     {
-                        plannedStoppingTime = shiftTime.Value - arrival;
                         accum = shiftTime.Value;
+                        while (accum < arrival + essentialStoppingTime) accum += monthLength / it.divisor;
                     }
                     else
                     {
@@ -144,8 +139,14 @@ namespace Suitougreentea.SimuDia
                     if (from.tripTimeOffset != null) tripTime += from.tripTimeOffset.Value;
                     accum += tripTime;
 
-                    list.Add(new LineTimeStationData(arrival, departure, shiftNum, plannedStoppingTime, essentialStoppingTime, tripTime));
+                    list.Add(new LineTimeStationData(arrival, departure, shiftNum, essentialStoppingTime, tripTime));
                 }
+
+                var oldFirst = list[0];
+                var last = list.Last();
+                var firstArrival = last.departure + last.tripTime;
+                while (oldFirst.departure - oldFirst.essentialStoppingTime < firstArrival) firstArrival -= monthLength / it.divisor;
+                list[0] = new LineTimeStationData(firstArrival, oldFirst.departure, oldFirst.shiftNum, oldFirst.essentialStoppingTime, oldFirst.tripTime);
 
                 return new LineTimeData(list);
             }).ToList();

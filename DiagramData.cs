@@ -147,12 +147,12 @@ namespace Suitougreentea.SimuDia
     public struct LineTimeData
     {
         public readonly List<LineTimeStationData> list;
-        public readonly long tripTime;
+        public readonly long wholeTripTime;
 
         public LineTimeData(List<LineTimeStationData> list)
         {
             this.list = list;
-            tripTime = list.Last().departure + list.Last().tripTime - list.First().departure;
+            wholeTripTime = list.Last().departure + list.Last().tripTime - list.First().departure;
         }
     }
 
@@ -161,16 +161,14 @@ namespace Suitougreentea.SimuDia
         public readonly long arrival;
         public readonly long departure;
         public readonly int? shiftNum;
-        public readonly long? plannedStoppingTime;
         public readonly long essentialStoppingTime;
         public readonly long tripTime;
 
-        public LineTimeStationData(long arrival, long departure, int? shiftNum, long? plannedStoppingTime, long essentialStoppingTime, long tripTime)
+        public LineTimeStationData(long arrival, long departure, int? shiftNum, long essentialStoppingTime, long tripTime)
         {
             this.arrival = arrival;
             this.departure = departure;
             this.shiftNum = shiftNum;
-            this.plannedStoppingTime = plannedStoppingTime;
             this.essentialStoppingTime = essentialStoppingTime;
             this.tripTime = tripTime;
         }

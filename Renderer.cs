@@ -72,71 +72,91 @@ namespace Suitougreentea.SimuDia
             }
         }
 
+        private float GetLineY(float x, float fromX, float fromY, float toX, float toY)
+        {
+            return (x - fromX) / (toX - fromX) * (toY - fromY) + fromY;
+        }
+
+        private List<Tuple<PointF, PointF>> NormalizeLines(float fromX, float fromY, float toX, float toY, float width)
+        {
+            var result = new List<Tuple<PointF, PointF>>();
+            while (toX < 0f)
+            {
+                fromX += width;
+                toX += width;
+            }
+            while (fromX > width)
+            {
+                fromX -= width;
+                toX -= width;
+            }
+            if (fromX < toX)
+            {
+                var croppedFromX = Math.Max(0f, fromX);
+                var croppedFromY = GetLineY(croppedFromX, fromX, fromY, toX, toY);
+                var croppedToX = Math.Min(toX, width);
+                var croppedToY = GetLineY(croppedToX, fromX, fromY, toX, toY);
+                if (fromX < 0f) result.AddRange(NormalizeLines(fromX + width, fromY, width, croppedFromY, width));
+                result.Add(Tuple.Create(new PointF(croppedFromX, croppedFromY), new PointF(croppedToX, croppedToY)));
+                if (toX > width) result.AddRange(NormalizeLines(0f, croppedToY, toX - width, toY, width));
+            }
+            return result;
+        }
+
         private void drawLine(Pen pen, long fromTime, float fromY, long toTime, float toY)
         {
-            var monthLength = diagram.monthLength;
-            if (fromTime > toTime) return;
-            while (fromTime > monthLength)
+            if (fromTime == toTime)
             {
-                fromTime -= monthLength;
-                toTime -= monthLength;
-            }
-            if (toTime > monthLength)
-            {
-                var interY = fromY + (toY - fromY) * ((float)(monthLength - fromTime) / (toTime - fromTime));
-                drawLine(pen, fromTime, fromY, monthLength, interY);
-                drawLine(pen, 0L, interY, toTime - monthLength, toY);
+                var x = timeToX(fromTime);
+                while (x < 0f) x += plotWidth;
+                while (x > plotWidth) x -= plotWidth;
+                g.DrawLine(pen, x, fromY, x, toY);
             }
             else
             {
-                g.DrawLine(pen, timeToX(fromTime), fromY, timeToX(toTime), toY);
+                NormalizeLines(timeToX(fromTime), fromY, timeToX(toTime), toY, plotWidth).ForEach(it =>
+                {
+                    g.DrawLine(pen, it.Item1, it.Item2);
+                });
             }
         }
 
-        private void addProtrudingArea(int stationIndex, long fromTime, long toTime, int level, ProtrudingDirection direction)
+        public void drawProtrudingLine(Pen pen, bool upsideDownDirection, int stationIndex, long arrival, long departure)
         {
-            var monthLength = diagram.monthLength;
-            if (toTime - fromTime >= monthLength) toTime = fromTime + monthLength;
-            while (fromTime > monthLength)
+            var normalized = NormalizeLines(timeToX(arrival), 0f, timeToX(departure), 0f, plotWidth);
+            var y = stationY[stationIndex];
+            float intervalY;
+            ProtrudingDirection protrudingDirection;
+            if (upsideDownDirection)
             {
-                fromTime -= monthLength;
-                toTime -= monthLength;
-            }
-            if (toTime > monthLength)
-            {
-                protruding[stationIndex].Add(new ProtrudingArea(timeToX(fromTime), timeToX(monthLength), level, direction));
-                protruding[stationIndex].Add(new ProtrudingArea(timeToX(0L), timeToX(toTime - monthLength), level, direction));
+                protrudingDirection = ProtrudingDirection.DOWN;
+                if (stationIndex == diagram.stations.Count - 1) intervalY = bottomMargin;
+                else intervalY = stationY[stationIndex + 1] - stationY[stationIndex];
             }
             else
             {
-                protruding[stationIndex].Add(new ProtrudingArea(timeToX(fromTime), timeToX(toTime), level, direction));
+                protrudingDirection = ProtrudingDirection.UP;
+                if (stationIndex == 0) intervalY = topMargin;
+                else intervalY = stationY[stationIndex] - stationY[stationIndex - 1];
             }
-        }
 
-        private int computeProtrudingLevel(int stationIndex, long fromTime, long toTime, ProtrudingDirection direction)
-        {
-            var monthLength = diagram.monthLength;
-            if (toTime - fromTime >= monthLength) toTime = fromTime + monthLength;
-            while (fromTime > monthLength)
+            var protrudingLevel = normalized.Select(it =>
             {
-                fromTime -= monthLength;
-                toTime -= monthLength;
-            }
-            if (toTime > monthLength)
-            {
-                return Math.Max(computeProtrudingLevel(stationIndex, fromTime, monthLength, direction),
-                    computeProtrudingLevel(stationIndex, 0, toTime - monthLength, direction));
-            }
-            else
-            {
-                var start = timeToX(fromTime);
-                var end = timeToX(toTime);
+                var start = it.Item1.X;
+                var end = it.Item2.X;
                 var i = 0;
-                while (true) {
-                    if (!protruding[stationIndex].Where(it => it.level == i).Any(it => (it.start <= start && start <= it.end) || (it.start <= end && end <= it.end))) return i;
+                while (true)
+                {
+                    if (!protruding[stationIndex].Where(ce => ce.level == i).Any(ce => (ce.start <= start && start <= ce.end) || (ce.start <= end && end <= ce.end))) return i;
                     i++;
                 }
-            }
+            }).Max();
+
+            var protrudingOffset = Math.Min(5f * (protrudingLevel + 1), intervalY / 3f * 2f) * (protrudingDirection == ProtrudingDirection.DOWN ? 1 : -1);
+            drawLine(pen, arrival, y, arrival, y + protrudingOffset);
+            drawLine(pen, arrival, y + protrudingOffset, departure, y + protrudingOffset);
+            drawLine(pen, departure, y + protrudingOffset, departure, y);
+            protruding[stationIndex].AddRange(normalized.Select(it => new ProtrudingArea(it.Item1.X, it.Item2.X, protrudingLevel, protrudingDirection)));
         }
 
         public Bitmap render()
@@ -181,13 +201,18 @@ namespace Suitougreentea.SimuDia
                 if (!lineVisibility[i]) continue;
                 var it = lines[i];
                 var list = lineTimes[i].list;
+                var reverseDiv = lineTimes[i].wholeTripTime + lineTimes[i].list[0].essentialStoppingTime / (monthLength / it.divisor);
+
                 var pen = new Pen(it.color, it.width);
                 var penDashed = new Pen(it.color, it.width);
                 penDashed.DashPattern = new float[] { 3f, 3f };
+
                 for(var n = 0; n < it.divisor; n++)
                 {
                     var divOffset = monthLength / it.divisor * n;
-                    var upsideDownDirection = false;
+                    var lastStationIndex = stations.IndexOf(it.stations.Last().station);
+                    var firstStationIndex = stations.IndexOf(it.stations.First().station);
+                    var upsideDownDirection = lastStationIndex > firstStationIndex;
                     for (var j = 0; j < list.Count; j++)
                     {
                         var fromTimeData = list[j];
@@ -205,33 +230,8 @@ namespace Suitougreentea.SimuDia
                         var newUpsideDownDirection = fromStationIndex > toStationIndex;
                         var reverseDirection = upsideDownDirection != newUpsideDownDirection;
                         upsideDownDirection = newUpsideDownDirection;
-                        if (j != 0)
-                        {
-                            if (reverseDirection)
-                            {
-                                float intervalY;
-                                ProtrudingDirection protrudingDirection;
-                                if (upsideDownDirection)
-                                {
-                                    protrudingDirection = ProtrudingDirection.DOWN;
-                                    if (fromStationIndex == stations.Count - 1) intervalY = bottomMargin;
-                                    else intervalY = stationY[fromStationIndex + 1] - stationY[fromStationIndex];
-                                }
-                                else
-                                {
-                                    protrudingDirection = ProtrudingDirection.UP;
-                                    if (fromStationIndex == stations.Count - 1) intervalY = topMargin;
-                                    else intervalY = stationY[fromStationIndex] - stationY[fromStationIndex - 1];
-                                }
-                                var protrudingLevel = computeProtrudingLevel(fromStationIndex, fromArrival, fromDeparture, protrudingDirection);
-                                var protrudingOffset = Math.Min(5f * (protrudingLevel + 1), intervalY / 3f * 2f) * (protrudingDirection == ProtrudingDirection.DOWN ? 1 : -1);
-                                drawLine(currentPen, fromArrival, fromY, fromArrival, fromY + protrudingOffset);
-                                drawLine(currentPen, fromArrival, fromY + protrudingOffset, fromDeparture, fromY + protrudingOffset);
-                                drawLine(currentPen, fromDeparture, fromY + protrudingOffset, fromDeparture, fromY);
-                                addProtrudingArea(fromStationIndex, fromArrival, fromDeparture, protrudingLevel, protrudingDirection);
-                            }
-                            else drawLine(currentPen, fromTimeData.arrival + divOffset, fromY, fromTimeData.departure + divOffset, fromY);
-                        }
+                        if (reverseDirection) drawProtrudingLine(currentPen, upsideDownDirection, fromStationIndex, fromArrival, fromDeparture);
+                        else drawLine(currentPen, fromTimeData.arrival + divOffset, fromY, fromTimeData.departure + divOffset, fromY);
                         drawLine(currentPen, fromTimeData.departure + divOffset, fromY, fromTimeData.departure + fromTimeData.tripTime + divOffset, toY);
                     }
                 }

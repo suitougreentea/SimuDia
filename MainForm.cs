@@ -67,7 +67,7 @@ namespace Suitougreentea.SimuDia
                 g.Clear(Color.White);
                 g.DrawLine(new Pen(l.color, l.width), 0f, 8f, 16f, 8f);
                 ListLine.SmallImageList.Images.Add(icon);
-                ListLine.Items.Add(new ListViewItem(new string[] { l.name, new TimeSpan(diagram.lineTimes[i].tripTime).ToString() }, i));
+                ListLine.Items.Add(new ListViewItem(new string[] { l.name, new TimeSpan(diagram.lineTimes[i].wholeTripTime).ToString() }, i));
                 var previousChecked = previousCheckedLineName.IndexOf(l.name) >= 0;
                 var previousUnchecked = previousUncheckedLineName.IndexOf(l.name) >= 0;
                 ListLine.Items[i + 1].Checked = (previousChecked || !previousUnchecked);
@@ -205,7 +205,7 @@ namespace Suitougreentea.SimuDia
                 var l = diagram.lines[index];
                 var t = diagram.lineTimes[index];
                 TextInfo.SelectedText = $"Name: {l.name}\n";
-                TextInfo.SelectedText = $"Estimated trip time: {new TimeSpan(t.tripTime)}\n\n";
+                TextInfo.SelectedText = $"Estimated trip time: {new TimeSpan(t.wholeTripTime)}\n\n";
                 for (var i = 0; i < t.list.Count; i++)
                 {
                     var le = l.stations[i];
