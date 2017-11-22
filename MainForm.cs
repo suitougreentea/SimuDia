@@ -132,7 +132,7 @@ namespace Suitougreentea.SimuDia
             {
                 OpenFileDialog dialog = new OpenFileDialog()
                 {
-                    Filter = "(*.simtt)|*.simtt",
+                    Filter = "SimuDia Input File (*.simudia)|*.simudia",
                     Title = "Open File",
                     RestoreDirectory = true,
                     CheckFileExists = true,

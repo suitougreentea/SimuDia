@@ -1,6 +1,4 @@
-﻿# これを見て適当に察してください
-
-[General]
+﻿[General]
 month_length=62400
 shift_divisor=1440
 default_loading_time = 0030
@@ -62,15 +60,3 @@ LittleBickingate@1
 Branch
 LittleBickingate@1
 LittleBickingate
---------------------
-name = test
-divisor = 2
-color = #00FF00
-width = 2
-default_loading_time = 1000
-Farford
-LittleBickingate
-Menford
-LittleBickingate
-Menford
-Swafhurst
