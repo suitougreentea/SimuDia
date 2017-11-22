@@ -31,7 +31,7 @@ namespace simutrans_diagram
             renderer.lineVisibility.Clear();
             for (var i = 1; i < ListLine.Items.Count; i++)
             {
-                renderer.lineVisibility.Add(ListLine.GetItemChecked(i));
+                renderer.lineVisibility.Add(ListLine.Items[i].Checked);
             }
         }
 
@@ -48,26 +48,33 @@ namespace simutrans_diagram
             string previousSelectedLineName = null;
             List<string> previousCheckedLineName = new List<string>();
             List<string> previousUncheckedLineName = new List<string>();
-            if (ListLine.SelectedIndex > 0) previousSelectedLineName = ListLine.Items[ListLine.SelectedIndex].ToString();
+            ListView.SelectedIndexCollection selectedIndices = ListLine.SelectedIndices;
+            if (selectedIndices.Count > 0 && selectedIndices[0] > 0) previousSelectedLineName = ListLine.Items[selectedIndices[0]].Text;
             for (var i = 1; i < ListLine.Items.Count; i++)
             {
-                if (ListLine.GetItemChecked(i)) previousCheckedLineName.Add(ListLine.Items[i].ToString());
-                else previousUncheckedLineName.Add(ListLine.Items[i].ToString());
+                if (ListLine.Items[i].Checked) previousCheckedLineName.Add(ListLine.Items[i].Text);
+                else previousUncheckedLineName.Add(ListLine.Items[i].Text);
             }
-            
+
+            ListLine.SmallImageList = new ImageList();
             ListLine.Items.Clear();
             ListLine.Items.Add("(General / All Lines)");
             for (var i = 0; i < diagram.lines.Count; i++)
             {
                 var l = diagram.lines[i];
-                ListLine.Items.Add(l.name);
+                var icon = new Bitmap(16, 16);
+                var g = Graphics.FromImage(icon);
+                g.Clear(Color.White);
+                g.DrawLine(new Pen(l.color, l.width), 0f, 8f, 16f, 8f);
+                ListLine.SmallImageList.Images.Add(icon);
+                ListLine.Items.Add(new ListViewItem(new string[] { l.name, new TimeSpan(diagram.lineTimes[i].tripTime).ToString() }, i));
                 var previousChecked = previousCheckedLineName.IndexOf(l.name) >= 0;
                 var previousUnchecked = previousUncheckedLineName.IndexOf(l.name) >= 0;
-                ListLine.SetItemCheckState(i + 1, (previousChecked || !previousUnchecked) ? CheckState.Checked : CheckState.Unchecked);
+                ListLine.Items[i + 1].Checked = (previousChecked || !previousUnchecked);
             }
             var selectedIndex = diagram.lines.FindIndex(it => it.name == previousSelectedLineName);
-            if (selectedIndex >= 0) ListLine.SetSelected(selectedIndex + 1, true);
-            else ListLine.SetSelected(0, true);
+            if (selectedIndex >= 0) ListLine.SelectedIndices.Add(selectedIndex + 1);
+            else ListLine.SelectedIndices.Add(0);
 
             ignoreCheckEvent = false;
             ListLine.Enabled = true;
@@ -83,17 +90,13 @@ namespace simutrans_diagram
         private void updateGlobalCheck()
         {
             var allChecked = true;
-            var allUnchecked = true;
             for (var i = 1; i < ListLine.Items.Count; i++)
             {
-                var state = ListLine.GetItemChecked(i);
+                var state = ListLine.CheckedIndices.IndexOf(i) >= 0;
                 allChecked &= state;
-                allUnchecked &= !state;
             }
             ignoreCheckEvent = true;
-            if (allChecked) ListLine.SetItemCheckState(0, CheckState.Checked);
-            else if (allUnchecked) ListLine.SetItemCheckState(0, CheckState.Unchecked);
-            else ListLine.SetItemCheckState(0, CheckState.Indeterminate);
+            ListLine.Items[0].Checked = allChecked;
             ignoreCheckEvent = false;
         }
         
@@ -141,59 +144,6 @@ namespace simutrans_diagram
             watcher.EnableRaisingEvents = true;
         }
 
-        private void ListLine_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (ListLine.SelectedIndex == -1) return;
-            TextInfo.Clear();
-            if (ListLine.SelectedIndex == 0)
-            {
-
-            }
-            else
-            {
-                var index = ListLine.SelectedIndex - 1;
-                var l = diagram.lines[index];
-                var t = diagram.lineTimes[index];
-                TextInfo.SelectedText = $"Name: {l.name}\n";
-                TextInfo.SelectedText = $"Estimated trip time: {new TimeSpan(t.tripTime)}\n\n";
-                for (var i = 0; i < t.list.Count; i++)
-                {
-                    var le = l.stations[i];
-                    var te = t.list[i];
-                    if (i != 0) TextInfo.SelectedText = $"{new TimeSpan(te.arrival)}-";
-                    TextInfo.SelectedText = $"{new TimeSpan(te.departure)} {le.station.name}";
-                    if (te.shiftNum != null) TextInfo.SelectedText = $" [shift: {te.shiftNum}]";
-                    TextInfo.SelectedText = $"\n";
-                    TextInfo.SelectedText = $"  | {new TimeSpan(te.tripTime)}\n";
-                }
-                TextInfo.SelectedText = $"{new TimeSpan(t.list.Last().departure + t.list.Last().tripTime)} {l.stations[0].station.name}";
-            }
-        }
-
-        private void ListLine_ItemCheck(object sender, ItemCheckEventArgs e)
-        {
-            if (ignoreCheckEvent) return;
-
-            BeginInvoke(new Action(() =>
-            {
-                if (e.Index == 0)
-                {
-                    ignoreCheckEvent = true;
-                    for (var i = 1; i < ListLine.Items.Count; i++)
-                    {
-                        ListLine.SetItemCheckState(i, e.NewValue);
-                    }
-                    ignoreCheckEvent = false;
-                }
-                else
-                {
-                    updateGlobalCheck();
-                }
-                updateVisibility();
-                redraw();
-            }));
-        }
-
         private void ButtonZoomInH_Click(object sender, EventArgs e)
         {
             renderer.zoomInHorizontal();
@@ -215,6 +165,62 @@ namespace simutrans_diagram
         private void ButtonZoomOutV_Click(object sender, EventArgs e)
         {
             renderer.zoomOutVertical();
+            redraw();
+        }
+
+        private void ListLine_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var selectedIndices = ListLine.SelectedIndices;
+            if (selectedIndices.Count == 0) return;
+            TextInfo.Clear();
+            if (selectedIndices[0] == 0)
+            {
+
+            }
+            else
+            {
+                var index = selectedIndices[0] - 1;
+                var l = diagram.lines[index];
+                var t = diagram.lineTimes[index];
+                TextInfo.SelectedText = $"Name: {l.name}\n";
+                TextInfo.SelectedText = $"Estimated trip time: {new TimeSpan(t.tripTime)}\n\n";
+                for (var i = 0; i < t.list.Count; i++)
+                {
+                    var le = l.stations[i];
+                    var te = t.list[i];
+                    if (i != 0) TextInfo.SelectedText = $"{new TimeSpan(te.arrival)}-";
+                    TextInfo.SelectedText = $"{new TimeSpan(te.departure)} {le.station.name}";
+                    if (te.shiftNum != null) TextInfo.SelectedText = $" [shift: {te.shiftNum}]";
+                    TextInfo.SelectedText = $"\n";
+                    TextInfo.SelectedText = $"  | {new TimeSpan(te.tripTime)}\n";
+                }
+                TextInfo.SelectedText = $"{new TimeSpan(t.list.Last().departure + t.list.Last().tripTime)} {l.stations[0].station.name}";
+            }
+        }
+
+        private void ListLine_Click(object sender, EventArgs e)
+        {
+            ListLine_SelectedIndexChanged(sender, e);
+        }
+
+        private void ListLine_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            if (ignoreCheckEvent) return;
+
+            if (e.Item.Index == 0)
+            {
+                ignoreCheckEvent = true;
+                for (var i = 1; i < ListLine.Items.Count; i++)
+                {
+                    ListLine.Items[i].Checked = e.Item.Checked;
+                }
+                ignoreCheckEvent = false;
+            }
+            else
+            {
+                updateGlobalCheck();
+            }
+            updateVisibility();
             redraw();
         }
     }

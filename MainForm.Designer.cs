@@ -37,7 +37,9 @@
             this.ButtonZoomInH = new System.Windows.Forms.Button();
             this.PanelPicture = new System.Windows.Forms.Panel();
             this.SubSplit = new System.Windows.Forms.SplitContainer();
-            this.ListLine = new System.Windows.Forms.CheckedListBox();
+            this.ListLine = new System.Windows.Forms.ListView();
+            this.NameHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.TimeHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.TextInfo = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.MainPicture)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MainSplit)).BeginInit();
@@ -186,16 +188,35 @@
             // 
             // ListLine
             // 
-            this.ListLine.Cursor = System.Windows.Forms.Cursors.Default;
+            this.ListLine.CheckBoxes = true;
+            this.ListLine.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.NameHeader,
+            this.TimeHeader});
             this.ListLine.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ListLine.FormattingEnabled = true;
-            this.ListLine.IntegralHeight = false;
+            this.ListLine.FullRowSelect = true;
+            this.ListLine.HideSelection = false;
+            this.ListLine.LabelWrap = false;
             this.ListLine.Location = new System.Drawing.Point(0, 0);
+            this.ListLine.MultiSelect = false;
             this.ListLine.Name = "ListLine";
+            this.ListLine.ShowGroups = false;
             this.ListLine.Size = new System.Drawing.Size(145, 107);
-            this.ListLine.TabIndex = 0;
-            this.ListLine.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.ListLine_ItemCheck);
+            this.ListLine.TabIndex = 1;
+            this.ListLine.UseCompatibleStateImageBehavior = false;
+            this.ListLine.View = System.Windows.Forms.View.Details;
+            this.ListLine.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.ListLine_ItemChecked);
             this.ListLine.SelectedIndexChanged += new System.EventHandler(this.ListLine_SelectedIndexChanged);
+            this.ListLine.Click += new System.EventHandler(this.ListLine_Click);
+            // 
+            // NameHeader
+            // 
+            this.NameHeader.Text = "Name";
+            this.NameHeader.Width = 200;
+            // 
+            // TimeHeader
+            // 
+            this.TimeHeader.Text = "Time";
+            this.TimeHeader.Width = 120;
             // 
             // TextInfo
             // 
@@ -214,7 +235,7 @@
             this.ClientSize = new System.Drawing.Size(507, 437);
             this.Controls.Add(this.MainSplit);
             this.Name = "MainForm";
-            this.Text = "SimutransDiagram Viewer 0.7.0";
+            this.Text = "SimutransDiagram Viewer 0.7.5";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.onLoad);
             ((System.ComponentModel.ISupportInitialize)(this.MainPicture)).EndInit();
@@ -242,9 +263,11 @@
         private System.Windows.Forms.Button ButtonZoomOutV;
         private System.Windows.Forms.Button ButtonZoomInH;
         private System.Windows.Forms.Button ButtonZoomOutH;
-        private System.Windows.Forms.CheckedListBox ListLine;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.RichTextBox TextInfo;
+        private System.Windows.Forms.ListView ListLine;
+        private System.Windows.Forms.ColumnHeader NameHeader;
+        private System.Windows.Forms.ColumnHeader TimeHeader;
     }
 }
 
