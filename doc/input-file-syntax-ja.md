@@ -20,7 +20,7 @@
 |形式名|制約|
 |------|----|
 |color|`#RRGGBB`の16進数形式。内部的には`ColorTranslator.FromHtml()`でパースできる必要があります。|
-|decimal|数。小数が許容されます。|
+|decimal|数。小数が許容されます。内部的には`float.Parse()`でパースできる必要があります。|
 |integer|整数。内部的には`int.Parse()`でパースできる必要があります。|
 |string|文字列。`"`は必要ありません。|
 |time|`mmss`, `Hmmss` ~~, `mm:ss`, `H:mm:ss`~~ のいずれかの形式。|
