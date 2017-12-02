@@ -106,7 +106,7 @@ namespace Suitougreentea.SimuDia
                     int? shiftNum = null;
                     if (i == 0) shiftNum = 0;
                     long? shiftTime = null;
-                    if (from.waitingTime != null) shiftNum = (int)(((double)(arrival + from.waitingTime) / monthLength) * shiftDivisor);
+                    if (from.waitingTime != null) shiftNum = (int)Math.Ceiling(((double)(arrival + from.waitingTime) / monthLength) * shiftDivisor);
                     if (from.shiftNum != null) shiftNum = from.shiftNum.Value;
                     else if (from.shiftTime != null) shiftNum = (int)(((double)from.shiftTime.Value / monthLength) * shiftDivisor);
 
