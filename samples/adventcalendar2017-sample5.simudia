@@ -1,0 +1,116 @@
+﻿[General]
+month_length=62400
+shift_divisor=1440
+default_loading_time = 0005
+
+[Stations]
+Farford
+Chilpool Lode West
+Chilpool Lode South
+St. Bride Swainpool
+Little Bickingate
+Highingchester Percy
+Munchworth
+Plumnell
+Mapleingworth
+Menford
+Evefieldwood
+Piterminster
+Manerbourne
+Swafhurst
+Chilen
+Rosehurst
+
+[RawTimes]
+Farford              -> Chilpool Lode West   :0406
+Chilpool Lode West   -> Chilpool Lode South  :0424
+Chilpool Lode South  -> St. Bride Swainpool  :0406
+St. Bride Swainpool  -> Little Bickingate    :0630
+Little Bickingate    -> Highingchester Percy :0700
+Highingchester Percy -> Munchworth           :0454
+Munchworth           -> Plumnell             :0506
+Plumnell             -> Mapleingworth        :0712
+Mapleingworth        -> Menford              :0642
+Menford              -> Evefieldwood         :0500
+Evefieldwood         -> Piterminster         :0524
+Piterminster         -> Manerbourne          :0448
+Manerbourne          -> Swafhurst            :0754
+Swafhurst            -> Chilen               :0506
+Chilen               -> Rosehurst            :0836
+
+Rosehurst            -> Chilen               :0824
+Chilen               -> Swafhurst            :0500
+Swafhurst            -> Manerbourne          :0812
+Manerbourne          -> Piterminster         :0442
+Piterminster         -> Evefieldwood         :0524
+Evefieldwood         -> Menford              :0506
+Menford              -> Mapleingworth        :0642
+Mapleingworth        -> Plumnell             :0700
+Plumnell             -> Munchworth           :0506
+Munchworth           -> Highingchester Percy :0448
+Highingchester Percy -> Little Bickingate    :0654
+Little Bickingate    -> St. Bride Swainpool  :0624
+St. Bride Swainpool  -> Chilpool Lode South  :0406
+Chilpool Lode South  -> Chilpool Lode West   :0424
+Chilpool Lode West   -> Farford              :0412
+
+Farford           -> Little Bickingate :1512
+Little Bickingate -> Plumnell          :1406
+Plumnell          -> Menford           :1236
+Menford           -> Swafhurst         :1906
+Swafhurst         -> Chilen            :0506
+Chilen            -> Rosehurst         :0830
+
+Rosehurst         -> Chilen            :0824
+Chilen            -> Swafhurst         :0454
+Swafhurst         -> Menford           :1842
+Menford           -> Plumnell          :1224
+Plumnell          -> Little Bickingate :1406
+Little Bickingate -> Farford           :1512
+
+[Lines]
+name = Local
+divisor = 12
+<shift=1000, reverse> Farford
+Chilpool Lode West
+Chilpool Lode South
+St. Bride Swainpool
+Little Bickingate
+Highingchester Percy
+Munchworth
+Plumnell
+Mapleingworth
+Menford
+Evefieldwood
+Piterminster
+Manerbourne
+<wait=2000, reverse> Swafhurst
+Manerbourne
+Piterminster
+Evefieldwood
+Menford
+Mapleingworth
+Plumnell
+Munchworth
+Highingchester Percy
+Little Bickingate
+St. Bride Swainpool
+Chilpool Lode South
+Chilpool Lode West
+-----
+name = Rapid
+divisor = 12
+color = #008800
+width = 2
+<shift_num=1, reverse> Farford
+Little Bickingate
+Plumnell
+Menford
+Swafhurst
+Chilen
+<wait=0500, reverse> Rosehurst
+Chilen
+Swafhurst
+Menford
+Plumnell
+Little Bickingate
