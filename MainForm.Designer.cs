@@ -235,7 +235,7 @@
             this.ClientSize = new System.Drawing.Size(507, 437);
             this.Controls.Add(this.MainSplit);
             this.Name = "MainForm";
-            this.Text = "SimuDia Diagram Viewer 0.7.5";
+            this.Text = "SimuDia Diagram Viewer 0.7.7";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.OnLoad);
             ((System.ComponentModel.ISupportInitialize)(this.MainPicture)).EndInit();
