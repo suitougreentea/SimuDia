@@ -114,8 +114,12 @@ namespace Suitougreentea.SimuDia
         // "= {value}" is optional
         private KeyValuePair<string, string> ParseOption(string input)
         {
-            var split = Regex.Match(input, @"(.*)=(.*)");
-            return new KeyValuePair<string, string>(split.Groups[1].Value.Trim(), split.Groups[2].Value.Trim());
+            if (input.IndexOf("=") >= 0)
+            {
+                var split = Regex.Match(input, @"(.*)=(.*)");
+                return new KeyValuePair<string, string>(split.Groups[1].Value.Trim(), split.Groups[2].Value.Trim());
+            }
+            else return new KeyValuePair<string, string>(input, null);
         }
 
         // Syntax: "{option}, ..."
